@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import supabase
-from routers import exercises, patients
+from routers import exercises, patients, programs
 
 app = FastAPI(title="Pocket Therapist API")
 
@@ -18,6 +18,7 @@ app.add_middleware(
 
 app.include_router(exercises.router)
 app.include_router(patients.router)
+app.include_router(programs.router)
 
 
 @app.get("/")
