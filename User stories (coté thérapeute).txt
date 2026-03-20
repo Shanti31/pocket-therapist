@@ -1,0 +1,73 @@
+User stories (coté thérapeute)
+
+-	Grace à pocket Therapy, je peux me connecter grâce à mon mail thérapeute
+
+Actions :   créér compte
+	login
+
+-	Grace à pocket Therapy, je peux envoyer un programme grâce a un lien temporaire
+
+Actions :   créer lien de programme
+	Partager lien au patient
+
+-	Grace à pocket Therapy, je peux construire un parcours d’exercices clair.
+
+Actions :   définir durée
+	Choisir exercices
+	Créer un programme
+	Structurer ordre programme et temps.
+
+
+-	Grace à pocket Therapy, je peux distribuer des programmes et suivre l’évolution.
+
+Actions :   sélectionner patients
+	Assigner un programme
+	Filtrer patients
+	Voir historiques 
+	Voir feedback
+
+
+-	Grace à pocket Therapy, je peux adapter le parcours d’un patient après parcours
+
+Actions :   définir durée
+	Reparamétrer exercices / programmes
+	Envoyer nouveau programme
+
+
+-	Grace à pocket Therapy, je peux créer des bibliothèques personnalisées
+
+Actions :   définir durée
+	Créer bibliothèque
+	Déterminer instructions
+	Déterminer exercices
+
+-	Grace à pocket Therapy, je peux veux voir un dashboard général des patients
+
+Actions :  personnaliser dashboard
+	Filter dashboard.
+
+
+
+User stories (coté patient)
+
+-	Grace à pocket Therapy, je peux créer un compte grace au lien du thérapeute et commencer mon aventure
+
+Actions :   créer compte avec nom, prénom, age
+	Mettre mot de passe en place après clickage du lien du thérapeute
+
+
+-	Grace à pocket Therapy, je veux voir mon programme de manière claire 
+Actions :  Accèder au dashboard
+
+
+-	Grace à pocket Therapy, je peux veux pouvoir démarrer mon programme journalier
+
+Actions :  démarrer séance
+	Feedback de skip exo
+
+
+-	Grace à pocket Therapy, je peux veux donner un feedback sur mon resenti de la séance
+
+Actions :  écrire un feedback
+	Sélectionner le degré de douleur, difficulté et fatigue
+	 écrire commentaire
