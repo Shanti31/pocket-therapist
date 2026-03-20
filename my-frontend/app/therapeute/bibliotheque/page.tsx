@@ -1,54 +1,47 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function BibliothequePage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filter, setFilter] = useState('all')
-  const [exercises, setExercises] = useState([
-    {
-      id: 1,
-      name: 'Rotation épaule',
-      description: 'Rotation externe de l\'épaule pour améliorer la mobilité',
-      videoUrl: 'video1.mp4',
-      category: 'Épaule',
-      difficulty: 'Facile',
-    },
-    {
-      id: 2,
-      name: 'Flexion avant',
-      description: 'Flexion antérieure du bras pour renforcer les muscles avant',
-      videoUrl: 'video2.mp4',
-      category: 'Épaule',
-      difficulty: 'Moyen',
-    },
-    {
-      id: 3,
-      name: 'Squats légers',
-      description: 'Exercice au poids du corps pour les jambes',
-      videoUrl: 'video3.mp4',
-      category: 'Jambes',
-      difficulty: 'Facile',
-    },
-    {
-      id: 4,
-      name: 'Montées escalier',
-      description: 'Renforcement des quadriceps et mollets',
-      videoUrl: 'video4.mp4',
-      category: 'Jambes',
-      difficulty: 'Moyen',
-    },
-    {
-      id: 5,
-      name: 'Abduction hanche',
-      description: 'Exercice pour renforcer les abducteurs de la hanche',
-      videoUrl: 'video5.mp4',
-      category: 'Hanche',
-      difficulty: 'Facile',
-    },
-  ])
+  const [exercises, setExercises] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [editingId, setEditingId] = useState(null)
   const [editData, setEditData] = useState({})
+  const [playingVideoUrl, setPlayingVideoUrl] = useState<string | null>(null)
+
+  // Fetch exercises from API
+  useEffect(() => {
+    const fetchExercises = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/exercises/')
+        if (!response.ok) throw new Error('Failed to fetch exercises')
+        const data = await response.json()
+        
+        // Map API data to component structure
+        const mappedExercises = data.data.map((exercise: any) => ({
+          id: exercise.id,
+          name: exercise.title,
+          description: exercise.description,
+          videoUrl: exercise.url,
+          category: exercise.category || 'Non catégorisé',
+          difficulty: 'Moyen', // Default since API doesn't have difficulty
+        }))
+        
+        setExercises(mappedExercises)
+        setError(null)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Une erreur est survenue')
+        console.error('Error fetching exercises:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchExercises()
+  }, [])
 
   const filteredExercises = exercises.filter((exercise) => {
     const matchesSearch = exercise.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -75,11 +68,38 @@ export default function BibliothequePage() {
     setEditData({})
   }
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">📚 Bibliothèque d'Exercices</h1>
+          <p className="text-gray-600 mt-2">Chargement des exercices...</p>
+        </div>
+        <div className="text-center py-12">
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">📚 Bibliothèque d'Exercices</h1>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">Erreur: {error}</p>
+      </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">📚 Bibliothèque d\'Exercices</h1>
+        <h1 className="text-3xl font-bold text-gray-900">📚 Bibliothèque d'Exercices</h1>
         <p className="text-gray-600 mt-2">Gérez vos exercices et utilisez-les dans vos programmes</p>
       </div>
 
@@ -196,14 +216,19 @@ export default function BibliothequePage() {
                         >
                           {exercise.difficulty}
                         </span>
-                        <a href={`#${exercise.videoUrl}`} className="text-indigo-600 hover:text-indigo-800 font-medium">
-                          🎥 Voir vidéo
-                        </a>
+                        {exercise.videoUrl && (
+                          <button 
+                            onClick={() => setPlayingVideoUrl(exercise.videoUrl)}
+                            className="text-indigo-600 hover:text-indigo-800 font-medium"
+                          >
+                            🎥 Voir vidéo
+                          </button>
+                        )}
                       </div>
                     </div>
                     <button
                       onClick={() => handleEdit(exercise)}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                      className="ml-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
                     >
                       ✏️ Modifier
                     </button>
@@ -212,12 +237,40 @@ export default function BibliothequePage() {
               </div>
             ))
           ) : (
-            <div className="p-12 text-center text-gray-500">
-              <p className="text-lg">Aucun exercice trouvé</p>
+            <div className="px-6 py-12 text-center text-gray-500">
+              <p className="text-lg">Aucun exercice trouvé.</p>
             </div>
           )}
         </div>
       </div>
+
+      {/* Modal - Video Player */}
+      {playingVideoUrl && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-auto">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900">Lecteur vidéo</h3>
+              <button 
+                onClick={() => setPlayingVideoUrl(null)}
+                className="text-gray-400 hover:text-gray-600 text-2xl">
+                ✕
+              </button>
+            </div>
+            <div className="bg-black p-6 flex items-center justify-center min-h-96">
+              <video 
+                width="100%" 
+                height="auto" 
+                controls
+                autoPlay
+                className="max-h-96 lg:max-h-96"
+              >
+                <source src={playingVideoUrl} type="video/mp4" />
+                Votre navigateur ne supporte pas la lecture vidéo.
+              </video>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
