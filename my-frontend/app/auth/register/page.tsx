@@ -1,4 +1,20 @@
+'use client';
+
+import { useState } from 'react';
+
 export default function RegisterPage() {
+  const [name, setName] = useState('');
+  const [surname, setSurname] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('patient');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Registration attempt:', { name, surname, email, password, role });
+    // TODO: Add registration logic
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -7,7 +23,107 @@ export default function RegisterPage() {
             Inscription - Pocket Therapist
           </h2>
         </div>
-        {/* Formulaire d'inscription */}
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-4 mb-6">
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center">
+                <input
+                  id="patient"
+                  name="role"
+                  type="radio"
+                  value="patient"
+                  checked={role === 'patient'}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+                <label htmlFor="patient" className="ml-2 block text-sm text-gray-700">
+                  Patient
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  id="therapeute"
+                  name="role"
+                  type="radio"
+                  value="therapeute"
+                  checked={role === 'therapeute'}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+                <label htmlFor="therapeute" className="ml-2 block text-sm text-gray-700">
+                  Therapeute
+                </label>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-md shadow-sm space-y-4">
+            <div>
+              <label htmlFor="name" className="sr-only">
+                Name
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                placeholder="Name"
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="surname" className="sr-only">
+                Surname
+              </label>
+              <input
+                id="surname"
+                name="surname"
+                type="text"
+                placeholder="Surname"
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                value={surname}
+                onChange={(e) => setSurname(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="email" className="sr-only">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Email"
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Password"
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Register
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )
