@@ -33,7 +33,7 @@ def get_all_programs(therapist_id: str | None = None):
         # 2. Join with 'program_exercises'
         # 3. Inside that, join with 'video_metadata' to get the actual video details
         query = supabase.table("programs").select(
-            "*, program_exercises(*, video_metadata(*))"
+            "*, program_exercises(*, videos_metadata(*))"
         )
 
         if therapist_id:

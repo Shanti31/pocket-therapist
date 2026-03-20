@@ -14,6 +14,12 @@ class SessionUpdate(BaseModel):
     status: str
 
 
+class FeedbackCreate(BaseModel):
+    pain_level: int
+    effort_level: int | None = None
+    notes: str | None = None
+
+
 # --- GET ENDPOINTS ---
 
 
@@ -62,9 +68,13 @@ def get_patient_sessions(patient_id: int, status: str | None = None):
     """
     try:
         # THE DEEP JOIN: session -> therapist AND session -> exercises -> video_metadata
+        # THE DEEP JOIN: Now includes session_feedback
+        # WARNING: Ensure videos_metadata matches your actual Supabase table name!
         query = (
             supabase.table("sessions")
-            .select("*, therapists(*), session_exercises(*, video_metadata(*))")
+            .select(
+                "*, therapists(*), session_exercises(*, videos_metadata(*)), session_feedback(*)"
+            )
             .eq("patient_id", patient_id)
         )
 
@@ -162,3 +172,39 @@ def update_session_status(patient_id: int, session_id: str, payload: SessionUpda
         return {"status": "success", "data": res.data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{patient_id}/sessions/{session_id}/feedback")
+def submit_session_feedback(patient_id: int, session_id: str, payload: FeedbackCreate):
+    """
+    Patient Action: Submit post-workout feedback.
+    This is blocked if feedback already exists due to the UNIQUE constraint.
+    """
+    try:
+        feedback_data = {
+            "session_id": session_id,
+            "patient_id": patient_id,
+            "pain_level": payload.pain_level,
+            "effort_level": payload.effort_level,
+            "notes": payload.notes,
+        }
+
+        res = supabase.table("session_feedback").insert(feedback_data).execute()
+
+        # Optional: Automatically mark the session as 'completed' when feedback is submitted
+        supabase.table("sessions").update({"status": "completed"}).eq(
+            "id", session_id
+        ).execute()
+
+        return {"status": "success", "message": "Feedback recorded.", "data": res.data}
+
+    except Exception as e:
+        # Supabase will throw a specific error if the UNIQUE constraint is violated
+        if "duplicate key value" in str(e).lower():
+            raise HTTPException(
+                status_code=400,
+                detail="Feedback has already been submitted for this session.",
+            )
+        raise HTTPException(
+            status_code=500, detail=f"Failed to submit feedback: {str(e)}"
+        )
