@@ -20,6 +20,17 @@ class FeedbackCreate(BaseModel):
     notes: str | None = None
 
 
+class PatientCreate(BaseModel):
+    first_name: str
+    last_name: str
+    age: int | None = None
+    email: str
+    exercise_difficulty: int = 5
+    adhesion: int = 0
+    pain_level: int = 0
+    number_of_programs: int = 0
+
+
 # --- GET ENDPOINTS ---
 
 
@@ -121,6 +132,51 @@ def get_patient_progress(patient_id: int):
 
 
 # --- POST & PATCH ENDPOINTS ---
+
+
+@router.post("/")
+def create_patient(payload: PatientCreate):
+    """
+    Create a new patient.
+    """
+    try:
+        patient_data = {
+            "first_name": payload.first_name,
+            "last_name": payload.last_name,
+            "age": payload.age,
+            "email": payload.email,
+            "exercise_difficulty": payload.exercise_difficulty,
+            "adhesion": payload.adhesion,
+            "pain_level": payload.pain_level,
+            "number_of_programs": payload.number_of_programs,
+        }
+
+        print(f"Creating patient with data: {patient_data}")
+        
+        response = supabase.table("patients").insert(patient_data).execute()
+        
+        print(f"Patient response: {response}")
+
+        if not response.data:
+            raise Exception(f"No data returned. Response: {response}")
+
+        created_patient = response.data[0]
+        
+        print(f"Created patient with ID: {created_patient.get('id')}")
+
+        return {
+            "status": "success",
+            "data": created_patient
+        }
+
+    except Exception as e:
+        error_msg = str(e)
+        print(f"ERROR creating patient: {error_msg}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Failed to create patient: {error_msg}"
+        )
 
 
 @router.post("/{patient_id}/sessions")

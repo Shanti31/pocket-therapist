@@ -83,6 +83,7 @@ export default function TherapeuteLayout({
               </button>
               <button
                 onClick={() => {
+                  router.push('/therapeute/patients?createPatient=true')
                   setShowActionMenu(false)
                 }}
                 className="w-full flex items-center gap-2 px-4 py-3 text-left text-gray-900 hover:bg-green-50 font-medium transition-colors"
