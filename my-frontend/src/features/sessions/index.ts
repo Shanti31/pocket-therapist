@@ -19,13 +19,21 @@ export type {
 
 export { SKIP_REASON_LABELS, DIFFICULTY_LABELS, FATIGUE_LABELS } from './types';
 
-// Mock data
+// Mock data (kept for fallback/reference if needed)
 export {
   mockTherapists,
   mockPendingSessions,
   mockCompletedSessions,
   mockProgress,
 } from './mock-data';
+
+// API
+export {
+  fetchPatientSessions,
+  fetchPatientProgress,
+  fetchPatientTherapists,
+  updateSessionStatus,
+} from './api';
 
 // Components
 export { default as PatientDashboard } from './components/PatientDashboard';
