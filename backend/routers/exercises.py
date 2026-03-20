@@ -11,8 +11,8 @@ def get_all_exercises(category: str = None):
     Frontend usage: GET /exercises or GET /exercises?category=Shoulder
     """
     try:
-        # We query the video_metadata table we built earlier
-        query = supabase.table("video_metadata").select("*")
+        # We query the videos_metadata table we built earlier
+        query = supabase.table("videos_metadata").select("*")
 
         if category:
             query = query.eq("body_part", category)
@@ -32,7 +32,7 @@ def get_single_exercise(exercise_id: str):
     """
     try:
         response = (
-            supabase.table("video_metadata")
+            supabase.table("videos_metadata")
             .select("*")
             .eq("id", exercise_id)
             .single()
