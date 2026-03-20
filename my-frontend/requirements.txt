@@ -1,0 +1,25 @@
+# Pocket Therapist Frontend - Node.js Dependencies
+# This is a Node.js/Next.js project. Use npm or yarn to install dependencies.
+# Install dependencies with: npm install or yarn install
+
+# Core Dependencies
+next==16.2.0
+react==19.2.4
+react-dom==19.2.4
+
+# Dev Dependencies
+@tailwindcss/postcss==^4
+@types/node==^20
+@types/react==^19
+@types/react-dom==^19
+eslint==^9
+eslint-config-next==16.2.0
+tailwindcss==^4
+typescript==^5
+
+# Notes:
+# - This file documents the main packages used in the project
+# - For a Node.js project, use package.json and package-lock.json instead
+# - To install dependencies: npm install
+# - To add a new package: npm install package-name
+# - To update dependencies: npm update
