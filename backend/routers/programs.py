@@ -21,6 +21,17 @@ class ExerciseList(BaseModel):
     exercise_ids: list[str]
 
 
+class AdaptProgramRequest(BaseModel):
+    title: str
+    difficulty: int = 5
+    duration: str = "4 semaines"
+
+
+class AssignProgramRequest(BaseModel):
+    program_id: str
+    is_personal: bool = False
+
+
 @router.get("/")
 def get_all_programs(therapist_id: str | None = None):
     """
@@ -246,3 +257,70 @@ def delete_program(program_id: str):
         return {"status": "success", "message": "Program deleted successfully."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to delete program: {str(e)}")
+
+
+@router.post("/{program_id}/adapt")
+def adapt_program(program_id: str, payload: AdaptProgramRequest):
+    """
+    Create an adapted (personalized) copy of an existing program.
+    The adapted program includes the original exercises and metadata.
+    """
+    try:
+        # 1. Get the original program with its exercises
+        original = (
+            supabase.table("programs")
+            .select("*, program_exercises(*, videos_metadata(*))")
+            .eq("id", program_id)
+            .single()
+            .execute()
+        )
+
+        if not original.data:
+            raise HTTPException(status_code=404, detail="Original program not found.")
+
+        original_program = original.data
+
+        # 2. Create the new adapted program
+        # Only use fields that exist in the programs table schema
+        adapted_program_data = {
+            "title": payload.title,
+            "description": f"Programme adapté - Difficulté: {payload.difficulty}/10, Durée: {payload.duration}",
+            "therapist_id": original_program.get("therapist_id"),
+        }
+
+        adapted_response = supabase.table("programs").insert(adapted_program_data).execute()
+
+        if not adapted_response.data:
+            raise Exception("Failed to create adapted program")
+
+        adapted_program = adapted_response.data[0]
+        adapted_program_id = adapted_program["id"]
+
+        # 3. Copy all exercises from the original program to the adapted one
+        if original_program.get("program_exercises"):
+            exercise_ids = [ex["exercise_id"] for ex in original_program["program_exercises"]]
+            if exercise_ids:
+                links = [
+                    {"program_id": adapted_program_id, "exercise_id": eid}
+                    for eid in exercise_ids
+                ]
+                supabase.table("program_exercises").insert(links).execute()
+
+        return {
+            "status": "success",
+            "data": {
+                "id": adapted_program["id"],
+                "title": adapted_program["title"],
+                "description": adapted_program.get("description"),
+                "created_at": adapted_program.get("created_at"),
+            }
+        }
+
+    except Exception as e:
+        error_msg = str(e)
+        print(f"ERROR adapting program: {error_msg}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Failed to adapt program: {error_msg}"
+        )

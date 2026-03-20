@@ -40,6 +40,30 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
     fetchPatient()
   }, [id])
 
+  // Fetch assigned programs for this patient
+  useEffect(() => {
+    const fetchAssignedPrograms = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/api/patients/${id}/programs`)
+        if (!response.ok) {
+          console.warn(`Status ${response.status} fetching programs, using empty list`)
+          setAssignedPrograms([])
+          return
+        }
+        const { data } = await response.json()
+        setAssignedPrograms(data || [])
+      } catch (err) {
+        console.error('Error fetching assigned programs:', err)
+        // Gracefully handle error - show empty list instead
+        setAssignedPrograms([])
+      }
+    }
+
+    if (id) {
+      fetchAssignedPrograms()
+    }
+  }, [id])
+
   // Fetch all programs
   useEffect(() => {
     const fetchPrograms = async () => {
@@ -78,31 +102,60 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
     )
   }
 
-  const handleAssignProgram = async () => {
-    if (!selectedProgramId) return
+  const handleAssignProgram = async (programId: string) => {
+    if (!programId) return
 
     try {
-      // In a real app, you would save this to the database
-      const program = availablePrograms.find(p => p.id === selectedProgramId)
-      if (program && !assignedPrograms.find(p => p.id === program.id)) {
-        setAssignedPrograms([...assignedPrograms, { ...program, isPersonal: false }])
+      const response = await fetch(`http://localhost:8000/api/patients/${id}/programs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          program_id: programId,
+          is_personal: false,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.detail || 'Failed to assign program')
       }
+
+      // Ajouter le programme à la liste locale immédiatement
+      const programToAdd = availablePrograms.find(p => p.id === programId)
+      if (programToAdd && !assignedPrograms.find(p => p.id === programId)) {
+        setAssignedPrograms([...assignedPrograms, { ...programToAdd, is_personal: false }])
+      }
+
       setShowAssignModal(false)
       setSelectedProgramId(null)
+      alert('Programme assigné au patient!')
     } catch (err) {
       console.error('Error assigning program:', err)
+      alert(`Erreur: ${err instanceof Error ? err.message : 'Unknown error'}`)
     }
   }
 
-  const handleRemoveProgram = (programId: string) => {
-    setAssignedPrograms(assignedPrograms.filter(p => p.id !== programId))
+  const handleRemoveProgram = async (programId: string) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/patients/${id}/programs/${programId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) throw new Error('Failed to remove program')
+
+      setAssignedPrograms(assignedPrograms.filter(p => p.id !== programId))
+      alert('Programme retiré du patient!')
+    } catch (err) {
+      console.error('Error removing program:', err)
+      alert(`Erreur: ${err instanceof Error ? err.message : 'Unknown error'}`)
+    }
   }
 
-  const openAdaptModal = (program: any) => {
+  const openAdaptModalFromTable = (program: any) => {
     setProgramToAdapt(program)
     setAdaptedData({
       name: `${program.title} - ${patient.first_name}`,
-      difficulty: program.difficulty || 5,
+      difficulty: 5,
       duration: '4 semaines'
     })
     setShowAdaptModal(true)
@@ -111,29 +164,59 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
   const handleAdaptProgram = async () => {
     if (programToAdapt && patient) {
       try {
-        // Create a new adapted program
-        const adaptedProgram = {
-          ...programToAdapt,
+        // 1. Create an adapted program
+        const adaptResponse = await fetch(
+          `http://localhost:8000/api/programs/${programToAdapt.id}/adapt`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: adaptedData.name,
+              difficulty: adaptedData.difficulty,
+              duration: adaptedData.duration,
+            }),
+          }
+        )
+
+        if (!adaptResponse.ok) {
+          const errorData = await adaptResponse.json()
+          throw new Error(errorData.detail || 'Failed to create adapted program')
+        }
+
+        const { data: adaptedProgram } = await adaptResponse.json()
+
+        // 2. Assign the adapted program to the patient
+        const assignResponse = await fetch(`http://localhost:8000/api/patients/${id}/programs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            program_id: adaptedProgram.id,
+            is_personal: true,
+          }),
+        })
+
+        if (!assignResponse.ok) {
+          const errorData = await assignResponse.json()
+          throw new Error(errorData.detail || 'Failed to assign adapted program')
+        }
+
+        // 3. Ajouter le programme adapté à la liste locale immédiatement
+        const newAdaptedProgram = {
+          id: adaptedProgram.id,
           title: adaptedData.name,
-          description: `Programme adapté pour ${patient.first_name} (${adaptedData.duration})`,
-          difficulty: adaptedData.difficulty,
-          isPersonal: true,
-          baseProgram: programToAdapt.id,
+          description: adaptedProgram.description,
+          is_personal: true,
+          program_exercises: programToAdapt.program_exercises || [],
         }
+        setAssignedPrograms([...assignedPrograms, newAdaptedProgram])
 
-        // In a real app, POST this to /api/programs
-        // For now, add to local state with a temporary ID
-        const newProgram = {
-          ...adaptedProgram,
-          id: `personal-${Date.now()}`,
-        }
-
-        setAssignedPrograms([...assignedPrograms, newProgram])
         setShowAdaptModal(false)
         setProgramToAdapt(null)
         setAdaptedData({ name: '', difficulty: 5, duration: '' })
+        alert('Programme adapté créé et assigné au patient!')
       } catch (err) {
         console.error('Error adapting program:', err)
+        alert(`Erreur: ${err instanceof Error ? err.message : 'Unknown error'}`)
       }
     }
   }
@@ -205,12 +288,20 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
                     <td className="px-6 py-4 text-gray-600 text-sm">{program.description}</td>
                     <td className="px-6 py-4 text-center">
                       <span className={`px-3 py-1 rounded-full font-medium text-sm ${
-                        program.isPersonal ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                        program.is_personal ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
                       }`}>
-                        {program.isPersonal ? '👤 Personnel' : '📋 Standard'}
+                        {program.is_personal ? '👤 Personnel' : '📋 Standard'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-6 py-4 text-center space-x-2 flex items-center justify-center">
+                      {!program.is_personal && (
+                        <button
+                          onClick={() => openAdaptModalFromTable(program)}
+                          className="px-3 py-1 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700 transition-colors"
+                        >
+                          ✏️ Adapter
+                        </button>
+                      )}
                       <button
                         onClick={() => handleRemoveProgram(program.id)}
                         className="text-red-600 hover:text-red-800 font-medium"
@@ -235,7 +326,7 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-black/50">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-96 overflow-y-auto">
             <div className="sticky top-0 bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-900">Assigner ou adapter un programme</h3>
+              <h3 className="text-xl font-bold text-gray-900">Assigner un programme au patient</h3>
               <button
                 onClick={() => setShowAssignModal(false)}
                 className="text-gray-400 hover:text-gray-600 text-2xl"
@@ -258,20 +349,12 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
                         <h4 className="font-medium text-gray-900">{program.title}</h4>
                         <p className="text-sm text-gray-600 mt-1">{program.description}</p>
                       </div>
-                      <div className="flex flex-col gap-2 ml-4">
-                        <button
-                          onClick={() => handleAssignProgram()}
-                          className="px-3 py-1 bg-indigo-600 text-white rounded text-sm font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
-                        >
-                          ➕ Assigner
-                        </button>
-                        <button
-                          onClick={() => openAdaptModal(program)}
-                          className="px-3 py-1 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700 transition-colors whitespace-nowrap"
-                        >
-                          ✏️ Adapter
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => handleAssignProgram(program.id)}
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap ml-4"
+                      >
+                        ➕ Assigner
+                      </button>
                     </div>
                   </div>
                 ))
