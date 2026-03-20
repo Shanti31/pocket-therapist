@@ -1,8 +1,23 @@
 # initializes fastapi
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
 from database import supabase
+from routers import exercises, patients
 
 app = FastAPI(title="Pocket Therapist API")
+
+# 1. The CORS Middleware (Crucial for frontend connection)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows your React/Vue app to connect
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(exercises.router)
+app.include_router(patients.router)
 
 
 @app.get("/")
