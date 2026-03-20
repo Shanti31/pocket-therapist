@@ -4,6 +4,7 @@ from database import supabase
 router = APIRouter(prefix="/api/exercises", tags=["Exercise Library"])
 
 
+# get all exercises
 @router.get("/")
 def get_all_exercises(category: str = None):
     """
@@ -12,7 +13,7 @@ def get_all_exercises(category: str = None):
     """
     try:
         # We query the video_metadata table we built earlier
-        query = supabase.table("video_metadata").select("*")
+        query = supabase.table("videos_metadata").select("*")
 
         if category:
             query = query.eq("body_part", category)
