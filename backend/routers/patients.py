@@ -18,9 +18,44 @@ class SessionUpdate(BaseModel):
 # --- GET ENDPOINTS (Reading Data) ---
 
 
+@router.get("/")
+def get_all_patients():
+    """
+    Fetch all patients.
+    Frontend usage: GET /api/patients
+    """
+    try:
+        response = supabase.table("patients").select("*").execute()
+        return {"status": "success", "data": response.data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+@router.get("/{patient_id}")
+def get_single_patient(patient_id: int):
+    """
+    Fetch a single patient by ID.
+    Frontend usage: GET /api/patients/1
+    """
+    try:
+        response = (
+            supabase.table("patients")
+            .select("*")
+            .eq("id", patient_id)
+            .single()
+            .execute()
+        )
+        return {"status": "success", "data": response.data}
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Patient not found or invalid ID.")
+
+
 @router.get("/{patient_id}/therapists")
 def get_patient_therapists(patient_id: int):
-    """Returns therapists assigned to this patient."""
+    """
+    Returns therapists assigned to this patient.
+    Frontend usage: GET /api/patients/1/therapists
+    """
     try:
         res = (
             supabase.table("patient_therapists")
