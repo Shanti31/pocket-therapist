@@ -1,10 +1,20 @@
+'use client';
+
+import { useState } from 'react';
 import type { Session } from '../types';
+import SessionDetails from './SessionDetails';
 
 interface CompletedSessionsProps {
   sessions: Session[];
 }
 
+/**
+ * Feature 6 – les sessions terminées sont cliquables
+ * et ouvrent SessionDetails pour le récapitulatif détaillé.
+ */
 export default function CompletedSessions({ sessions }: CompletedSessionsProps) {
+  const [detailSession, setDetailSession] = useState<Session | null>(null);
+
   if (sessions.length === 0) {
     return (
       <section>
@@ -26,10 +36,15 @@ export default function CompletedSessions({ sessions }: CompletedSessionsProps) 
               })
             : '';
 
+          const completedCount = session.exerciseResults
+            ? session.exerciseResults.filter((r) => r.status === 'completed').length
+            : session.exercises.length;
+
           return (
-            <div
+            <button
               key={session.id}
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100"
+              onClick={() => setDetailSession(session)}
+              className="w-full text-left flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-green-200 hover:bg-green-50 active:scale-98 transition-all"
             >
               <div className="flex items-center gap-3">
                 <span className="text-green-600 text-lg">✓</span>
@@ -38,15 +53,29 @@ export default function CompletedSessions({ sessions }: CompletedSessionsProps) 
                   <p className="text-xs text-gray-500">{date}</p>
                 </div>
               </div>
-              {session.painRating !== undefined && (
-                <span className="text-xs text-gray-500">
-                  Douleur : {session.painRating}/10
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {session.painRating !== undefined && (
+                  <span className="text-xs text-gray-400">
+                    {session.painRating}/10
+                  </span>
+                )}
+                <span className="text-xs text-green-600 font-medium">
+                  {completedCount}/{session.exercises.length}
                 </span>
-              )}
-            </div>
+                <span className="text-xs text-gray-400">›</span>
+              </div>
+            </button>
           );
         })}
       </div>
+
+      {/* Detail sheet */}
+      {detailSession && (
+        <SessionDetails
+          session={detailSession}
+          onClose={() => setDetailSession(null)}
+        />
+      )}
     </section>
   );
 }
