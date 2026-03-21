@@ -7,12 +7,14 @@ import PendingSessions from './PendingSessions';
 import CompletedSessions from './CompletedSessions';
 import ProgressTracker from './ProgressTracker';
 import SessionRunner from './SessionRunner';
+import PatientNotesCard from './PatientNotesCard';
 
 interface PatientDashboardProps {
   therapists: Therapist[];
   pendingSessions: Session[];
   completedSessions: Session[];
   progress: PatientProgress;
+  patientId?: number;
 }
 
 export default function PatientDashboard({
@@ -20,12 +22,13 @@ export default function PatientDashboard({
   pendingSessions,
   completedSessions,
   progress,
+  patientId,
 }: PatientDashboardProps) {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
   const activeSession = pendingSessions.find((s) => s.id === activeSessionId);
 
-  // If a session is active, show the SessionRunner in full-screen mode
+  // If a session is active, show the full-screen SessionRunner
   if (activeSession) {
     return (
       <SessionRunner
@@ -43,8 +46,10 @@ export default function PatientDashboard({
         <p className="text-gray-500 text-sm mt-1">Voici votre programme du jour</p>
       </div>
 
+      {/* Feature 6 progression globale */}
       <ProgressTracker progress={progress} />
 
+      {/* Feature 3 – aperçu + démarrage */}
       <PendingSessions
         sessions={pendingSessions}
         onStartSession={(id) => setActiveSessionId(id)}
@@ -52,7 +57,11 @@ export default function PatientDashboard({
 
       <TherapistList therapists={therapists} />
 
+      {/* Feature 6 – historique cliquable */}
       <CompletedSessions sessions={completedSessions} />
+
+      {/* Feature 7 – journal de bord */}
+      <PatientNotesCard patientId={patientId} />
     </div>
   );
 }

@@ -1,6 +1,10 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from typing import Optional
 from database import supabase
+from pydantic import BaseModel, Field, ConfigDict
+from typing import List, Optional
+from enum import Enum
 
 router = APIRouter(prefix="/api/patients", tags=["Patients (Frontend Contract)"])
 
@@ -34,6 +38,56 @@ class PatientCreate(BaseModel):
 class AssignProgramToPatient(BaseModel):
     program_id: str
     is_personal: bool = False
+
+
+## add strict pydantic contracts
+# --- Enums for Strict Validation ---
+class DifficultyEnum(str, Enum):
+    easy = "easy"
+    medium = "medium"
+    hard = "hard"
+
+
+class FatigueEnum(str, Enum):
+    low = "low"
+    moderate = "moderate"
+    high = "high"
+
+
+# --- Sub-models for the Arrays ---
+class SkippedExercise(BaseModel):
+    exercise_id: str = Field(alias="exerciseId")
+    reason: str
+
+
+class ExerciseResult(BaseModel):
+    exercise_id: str = Field(alias="exerciseId")
+    status: str
+    pre_pain_rating: Optional[int] = Field(
+        default=None, alias="prePainRating", ge=1, le=10
+    )
+
+
+# --- Main Payloads ---
+class SessionFeedbackPayload(BaseModel):
+    # This config allows FastAPI to accept camelCase from React,
+    # but uses snake_case in your Python logic.
+    model_config = ConfigDict(populate_by_name=True)
+
+    pain_rating: int = Field(alias="painRating", ge=1, le=10)
+    difficulty: DifficultyEnum
+    fatigue: FatigueEnum
+    comment: Optional[str] = None
+    skipped_exercises: List[SkippedExercise] = Field(
+        default_factory=list, alias="skippedExercises"
+    )
+    exercise_results: List[ExerciseResult] = Field(
+        default_factory=list, alias="exerciseResults"
+    )
+
+
+class PatientNotePayload(BaseModel):
+    content: str
 
 
 # --- GET ENDPOINTS ---
@@ -78,7 +132,7 @@ def get_patient_therapists(patient_id: int):
 
 
 @router.get("/{patient_id}/sessions")
-def get_patient_sessions(patient_id: int, status: str | None = None):
+def get_patient_sessions(patient_id: int, status: Optional[str] = None):
     """
     Fetches sessions with nested therapist info AND all assigned exercises.
     """
@@ -157,27 +211,25 @@ def create_patient(payload: PatientCreate):
         }
 
         print(f"Creating patient with data: {patient_data}")
-        
+
         response = supabase.table("patients").insert(patient_data).execute()
-        
+
         print(f"Patient response: {response}")
 
         if not response.data:
             raise Exception(f"No data returned. Response: {response}")
 
         created_patient = response.data[0]
-        
+
         print(f"Created patient with ID: {created_patient.get('id')}")
 
-        return {
-            "status": "success",
-            "data": created_patient
-        }
+        return {"status": "success", "data": created_patient}
 
     except Exception as e:
         error_msg = str(e)
         print(f"ERROR creating patient: {error_msg}")
         import traceback
+
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Failed to create patient: {error_msg}"
@@ -305,32 +357,48 @@ def assign_program_to_patient(patient_id: int, payload: AssignProgramToPatient):
 
             # Update patient's number_of_programs (best effort - don't fail if this errors)
             try:
-                patient = supabase.table("patients").select("*").eq("id", patient_id).single().execute()
+                patient = (
+                    supabase.table("patients")
+                    .select("*")
+                    .eq("id", patient_id)
+                    .single()
+                    .execute()
+                )
                 current_count = patient.data.get("number_of_programs", 0) or 0
-                
-                supabase.table("patients").update({
-                    "number_of_programs": current_count + 1
-                }).eq("id", patient_id).execute()
+
+                supabase.table("patients").update(
+                    {"number_of_programs": current_count + 1}
+                ).eq("id", patient_id).execute()
             except Exception as update_err:
                 print(f"Warning: Could not update patient program count: {update_err}")
 
             return {
                 "status": "success",
                 "message": "Program assigned to patient.",
-                "data": res.data[0]
+                "data": res.data[0],
             }
         except Exception as assign_err:
             error_msg = str(assign_err)
             # If patient_programs table doesn't exist, still return success
             # Check for various table-not-found indicators
-            if ("PGRST205" in error_msg or "could not find the table" in error_msg.lower() or 
-                "not found" in error_msg.lower() or "relation" in error_msg.lower()):
-                print(f"Warning: patient_programs table may not exist - creating assignments in-memory: {error_msg}")
+            if (
+                "PGRST205" in error_msg
+                or "could not find the table" in error_msg.lower()
+                or "not found" in error_msg.lower()
+                or "relation" in error_msg.lower()
+            ):
+                print(
+                    f"Warning: patient_programs table may not exist - creating assignments in-memory: {error_msg}"
+                )
                 # Simulate successful assignment for now
                 return {
                     "status": "success",
                     "message": "Program assignment recorded (persistent storage pending database setup).",
-                    "data": {"program_id": payload.program_id, "patient_id": patient_id, "is_personal": payload.is_personal}
+                    "data": {
+                        "program_id": payload.program_id,
+                        "patient_id": patient_id,
+                        "is_personal": payload.is_personal,
+                    },
                 }
             raise
 
@@ -340,12 +408,14 @@ def assign_program_to_patient(patient_id: int, payload: AssignProgramToPatient):
         error_msg = str(e)
         print(f"ERROR assigning program: {error_msg}")
         import traceback
+
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Failed to assign program: {error_msg}"
         )
         print(f"ERROR assigning program: {error_msg}")
         import traceback
+
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Failed to assign program: {error_msg}"
@@ -370,33 +440,44 @@ def remove_program_from_patient(patient_id: int, program_id: str):
         except Exception as del_err:
             # If table doesn't exist, still return success
             error_msg = str(del_err)
-            if ("PGRST205" in error_msg or "could not find the table" in error_msg.lower() or
-                "not found" in error_msg.lower() or "relation" in error_msg.lower()):
+            if (
+                "PGRST205" in error_msg
+                or "could not find the table" in error_msg.lower()
+                or "not found" in error_msg.lower()
+                or "relation" in error_msg.lower()
+            ):
                 print(f"Warning: patient_programs table may not exist: {error_msg}")
-                return {"status": "success", "message": "Program removed (pending database setup)."}
+                return {
+                    "status": "success",
+                    "message": "Program removed (pending database setup).",
+                }
             raise
 
         # Update patient's number_of_programs (best effort)
         try:
-            patient = supabase.table("patients").select("*").eq("id", patient_id).single().execute()
+            patient = (
+                supabase.table("patients")
+                .select("*")
+                .eq("id", patient_id)
+                .single()
+                .execute()
+            )
             current_count = patient.data.get("number_of_programs", 0) or 0
             new_count = max(0, current_count - 1)
-            
-            supabase.table("patients").update({
-                "number_of_programs": new_count
-            }).eq("id", patient_id).execute()
+
+            supabase.table("patients").update({"number_of_programs": new_count}).eq(
+                "id", patient_id
+            ).execute()
         except Exception as update_err:
             print(f"Warning: Could not update patient program count: {update_err}")
 
-        return {
-            "status": "success",
-            "message": "Program removed from patient."
-        }
+        return {"status": "success", "message": "Program removed from patient."}
 
     except Exception as e:
         error_msg = str(e)
         print(f"ERROR removing program: {error_msg}")
         import traceback
+
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Failed to remove program: {error_msg}"
@@ -422,30 +503,76 @@ def get_patient_programs(patient_id: int):
         for assignment in response.data or []:
             program_data = assignment.get("programs", {})
             if program_data:  # Only add if program data exists
-                programs.append({
-                    **program_data,
-                    "is_personal": assignment.get("is_personal", False),
-                    "assigned_at": assignment.get("created_at"),
-                })
+                programs.append(
+                    {
+                        **program_data,
+                        "is_personal": assignment.get("is_personal", False),
+                        "assigned_at": assignment.get("created_at"),
+                    }
+                )
 
-        return {
-            "status": "success",
-            "data": programs
-        }
+        return {"status": "success", "data": programs}
 
     except Exception as e:
         error_msg = str(e)
         # If table doesn't exist, return empty list gracefully
-        if ("PGRST205" in error_msg or "could not find the table" in error_msg.lower() or
-            "not found" in error_msg.lower() or "relation" in error_msg.lower()):
-            print(f"Warning: Could not fetch patient programs (table may not exist): {error_msg}")
-            return {
-                "status": "success",
-                "data": []
-            }
+        if (
+            "PGRST205" in error_msg
+            or "could not find the table" in error_msg.lower()
+            or "not found" in error_msg.lower()
+            or "relation" in error_msg.lower()
+        ):
+            print(
+                f"Warning: Could not fetch patient programs (table may not exist): {error_msg}"
+            )
+            return {"status": "success", "data": []}
         # For other errors, still return empty list
         print(f"Warning: Error fetching patient programs: {error_msg}")
-        return {
-            "status": "success",
-            "data": []
+        return {"status": "success", "data": []}
+
+
+# 1. The Patient Notes Endpoint
+@router.post("/api/patients/{patient_id}/notes")
+def add_patient_note(patient_id: int, payload: PatientNotePayload):
+    """Saves a free-text note for a specific patient."""
+    try:
+        data = {"patient_id": patient_id, "note_content": payload.content}
+        # Insert into your Supabase patient_notes table
+        res = supabase.table("patient_notes").insert(data).execute()
+        return {"status": "success", "note_id": res.data[0]["id"]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# 2. The Session Completion Endpoint
+@router.post("/api/sessions/{session_id}/complete")
+def complete_session(session_id: str, payload: SessionFeedbackPayload):
+    """Processes the massive session feedback payload from the frontend."""
+    try:
+        # STEP A: Save the high-level session feedback
+        feedback_data = {
+            "session_id": session_id,
+            "pain_rating": payload.pain_rating,
+            "difficulty": payload.difficulty.value,
+            "fatigue": payload.fatigue.value,
+            "patient_comment": payload.comment,
         }
+        supabase.table("session_feedback").insert(feedback_data).execute()
+
+        # STEP B: Mark the session itself as completed
+        supabase.table("sessions").update({"status": "completed"}).eq(
+            "id", session_id
+        ).execute()
+
+        # STEP C: (Optional but recommended) Loop through exercise_results
+        # and skipped_exercises to update the bridge tables if you are tracking granular stats.
+        # Example:
+        # for skipped in payload.skipped_exercises:
+        #     supabase.table("session_exercises").update({"status": "skipped", "reason": skipped.reason}).eq("session_id", session_id).eq("exercise_id", skipped.exercise_id).execute()
+
+        return {"status": "success", "message": "Session completed and feedback saved."}
+
+    except Exception as e:
+        # If this fails halfway through, you have a partial database update.
+        # In a true enterprise system, this entire block would be wrapped in a Postgres Transaction.
+        raise HTTPException(status_code=500, detail=str(e))

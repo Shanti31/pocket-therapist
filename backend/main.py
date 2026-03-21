@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import supabase
 from routers import exercises, patients, programs
 
+
 app = FastAPI(title="Pocket Therapist API")
 
 # 1. The CORS Middleware (Crucial for frontend connection)
@@ -17,6 +18,7 @@ app.add_middleware(
     expose_headers=["*"],
     max_age=600,
 )
+
 
 app.include_router(exercises.router)
 app.include_router(patients.router)

@@ -17,6 +17,16 @@ export interface Exercise {
   durationSeconds?: number; // si basé sur un timer
   repetitions?: number;     // si basé sur des répétitions
   imageUrl?: string;
+  videoUrl?: string;        // URL de la vidéo d'instruction
+}
+
+/** Résultat d'un exercice dans la session (pour l'historique) */
+export interface ExerciseResult {
+  exerciseId: string;
+  exerciseTitle: string;
+  status: 'completed' | 'skipped';
+  prePainRating?: number;  // douleur avant l'exercice (0-10)
+  skipReason?: string;
 }
 
 export interface Session {
@@ -30,6 +40,8 @@ export interface Session {
   scheduledDate: string; // ISO date string
   completedDate?: string;
   painRating?: number;
+  /** Résultats détaillés par exercice (disponible après complétion) */
+  exerciseResults?: ExerciseResult[];
 }
 
 export type SkipReason =

@@ -8,6 +8,7 @@ export type {
   Therapist,
   Session,
   Exercise,
+  ExerciseResult,
   SessionFeedback,
   ExerciseSkipFeedback,
   PatientProgress,
@@ -19,13 +20,21 @@ export type {
 
 export { SKIP_REASON_LABELS, DIFFICULTY_LABELS, FATIGUE_LABELS } from './types';
 
-// Mock data
+// Mock data (kept for fallback/reference if needed)
 export {
   mockTherapists,
   mockPendingSessions,
   mockCompletedSessions,
   mockProgress,
 } from './mock-data';
+
+// API
+export {
+  fetchPatientSessions,
+  fetchPatientProgress,
+  fetchPatientTherapists,
+  updateSessionStatus,
+} from './api';
 
 // Components
 export { default as PatientDashboard } from './components/PatientDashboard';
@@ -36,3 +45,6 @@ export { default as PendingSessions } from './components/PendingSessions';
 export { default as CompletedSessions } from './components/CompletedSessions';
 export { default as ProgressTracker } from './components/ProgressTracker';
 export { default as SkipFeedbackSheet } from './components/SkipFeedbackSheet';
+export { default as SessionPreviewSheet } from './components/SessionPreviewSheet';
+export { default as SessionDetails } from './components/SessionDetails';
+export { default as PatientNotesCard } from './components/PatientNotesCard';
