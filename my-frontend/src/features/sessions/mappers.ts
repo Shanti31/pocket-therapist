@@ -23,7 +23,8 @@ export function mapSession(backendSession: any): Session {
       description: video.description || 'Description indisponible',
       durationSeconds: video.duration_seconds || video.durationSeconds,
       repetitions: video.repetitions,
-      imageUrl: video.thumbnail_url || video.imageUrl, // Fallbacks
+      imageUrl: video.thumbnail_url || video.imageUrl,
+      videoUrl: video.video_url || video.videoUrl,   // URL de la vidéo d'instruction
     };
   }).filter(Boolean) as Exercise[];
 

@@ -8,6 +8,7 @@ export type {
   Therapist,
   Session,
   Exercise,
+  ExerciseResult,
   SessionFeedback,
   ExerciseSkipFeedback,
   PatientProgress,
@@ -44,3 +45,6 @@ export { default as PendingSessions } from './components/PendingSessions';
 export { default as CompletedSessions } from './components/CompletedSessions';
 export { default as ProgressTracker } from './components/ProgressTracker';
 export { default as SkipFeedbackSheet } from './components/SkipFeedbackSheet';
+export { default as SessionPreviewSheet } from './components/SessionPreviewSheet';
+export { default as SessionDetails } from './components/SessionDetails';
+export { default as PatientNotesCard } from './components/PatientNotesCard';
