@@ -11,11 +11,11 @@ import type {
 import SkipFeedbackSheet from './SkipFeedbackSheet';
 import PostSessionFeedback from './PostSessionFeedback';
 
-// ─── Pain emoji scale ───────────────────────────────────────────────────────
+// --- Pain emoji scale ---------------------------------------------------
 const PAIN_EMOJIS = ['😊', '🙂', '😐', '😕', '😣', '😖', '😫', '😰', '🤕', '😵', '💀'];
 // index 0 = douleur 0, index 10 = douleur 10
 
-// ─── Phase machine ───────────────────────────────────────────────────────────
+// --- Phase machine ---------------------------------------------------
 type Phase = 'pre_pain' | 'video' | 'exercise';
 
 interface SessionRunnerProps {
@@ -25,23 +25,23 @@ interface SessionRunnerProps {
 }
 
 export default function SessionRunner({ session, onComplete, onCancel }: SessionRunnerProps) {
-  // ── Navigation state ────────────────────────────────────────────────────
+  // -- Navigation state --
   const [currentIndex, setCurrentIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('pre_pain');
 
-  // ── Pre-pain state ───────────────────────────────────────────────────────
+  // -- Pre-pain state --
   const [selectedPain, setSelectedPain] = useState<number>(0);
   const [prePainRatings, setPrePainRatings] = useState<Record<string, number>>({});
 
-  // ── Video state ──────────────────────────────────────────────────────────
+  // -- Video state --
   const [videoEnded, setVideoEnded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // ── Timer state ──────────────────────────────────────────────────────────
+  // -- Timer state --
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [timerRunning, setTimerRunning] = useState(false);
 
-  // ── Session completion state ─────────────────────────────────────────────
+  // -- Session completion state --
   const [showSkipSheet, setShowSkipSheet] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [skippedExercises, setSkippedExercises] = useState<ExerciseSkipFeedback[]>([]);
@@ -51,7 +51,7 @@ export default function SessionRunner({ session, onComplete, onCancel }: Session
   const currentExercise = exercises[currentIndex];
   const isLastExercise = currentIndex >= exercises.length - 1;
 
-  // ── Reset phase whenever exercise changes ────────────────────────────────
+  // -- Reset phase whenever exercise changes --
   useEffect(() => {
     setPhase('pre_pain');
     setSelectedPain(0);
@@ -60,7 +60,7 @@ export default function SessionRunner({ session, onComplete, onCancel }: Session
     setTimerRunning(false);
   }, [currentIndex, currentExercise?.durationSeconds]);
 
-  // ── Timer countdown (only runs in exercise phase) ─────────────────────────
+  // -- Timer countdown (only runs in exercise phase) --
   useEffect(() => {
     if (phase !== 'exercise') return;
     if (!timerRunning || timeRemaining === null || timeRemaining <= 0) return;
@@ -78,7 +78,7 @@ export default function SessionRunner({ session, onComplete, onCancel }: Session
     return () => clearInterval(interval);
   }, [timerRunning, timeRemaining, phase]);
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  // -- Helpers --
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -87,7 +87,7 @@ export default function SessionRunner({ session, onComplete, onCancel }: Session
 
   const progressPercent = ((currentIndex) / exercises.length) * 100;
 
-  // ── Phase transitions ────────────────────────────────────────────────────
+  // -- Phase transitions --
   const handlePrePainConfirm = () => {
     setPrePainRatings((prev) => ({ ...prev, [currentExercise.id]: selectedPain }));
     if (currentExercise.videoUrl) {
@@ -119,7 +119,7 @@ export default function SessionRunner({ session, onComplete, onCancel }: Session
     startExercisePhase();
   };
 
-  // ── Navigation ────────────────────────────────────────────────────────────
+  // -- Navigation --
   const goToNext = useCallback(
     (skipped = false, skipReason?: string) => {
       // Record result
@@ -159,7 +159,7 @@ export default function SessionRunner({ session, onComplete, onCancel }: Session
     onComplete();
   };
 
-  // ── Full-screen feedback ──────────────────────────────────────────────────
+  // -- Full-screen feedback --
   if (showFeedback) {
     return (
       <PostSessionFeedback
@@ -169,12 +169,12 @@ export default function SessionRunner({ session, onComplete, onCancel }: Session
     );
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
+  // ---
   // RENDER
-  // ─────────────────────────────────────────────────────────────────────────
+  // ---
   return (
     <div className="fixed inset-0 z-40 bg-white flex flex-col">
-      {/* ── Header ─────────────────────────────────────────────────────── */}
+      {/* -- Header -- */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
         <button
           onClick={onCancel}
@@ -190,7 +190,7 @@ export default function SessionRunner({ session, onComplete, onCancel }: Session
         </span>
       </div>
 
-      {/* ── Progress bar ───────────────────────────────────────────────── */}
+      {/* -- Progress bar -- */}
       <div className="w-full bg-gray-100 h-2">
         <div
           className="bg-[#00BAA8] h-1 transition-all duration-300"
@@ -201,7 +201,7 @@ export default function SessionRunner({ session, onComplete, onCancel }: Session
         Exercice {currentIndex + 1} sur {exercises.length}
       </div>
 
-      {/* ── Phase: pre_pain ─────────────────────────────────────────────── */}
+      {/* -- Phase: pre_pain -- */}
       {phase === 'pre_pain' && (
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
           <div className="w-full max-w-sm">
@@ -257,7 +257,7 @@ export default function SessionRunner({ session, onComplete, onCancel }: Session
         </div>
       )}
 
-      {/* ── Phase: video ────────────────────────────────────────────────── */}
+      {/* -- Phase: video -- */}
       {phase === 'video' && currentExercise.videoUrl && (
         <div className="flex-1 flex flex-col">
           <div className="px-4 pt-4 pb-2">
@@ -322,7 +322,7 @@ export default function SessionRunner({ session, onComplete, onCancel }: Session
         </button>
       </div>
 
-      {/* ── Skip feedback sheet ─────────────────────────────────────────── */}
+      {/* -- Skip feedback sheet -- */}
       {showSkipSheet && (
         <SkipFeedbackSheet
           exerciseTitle={currentExercise.title}
