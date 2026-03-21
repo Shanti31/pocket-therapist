@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from typing import Optional
 from database import supabase
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
@@ -131,7 +132,7 @@ def get_patient_therapists(patient_id: int):
 
 
 @router.get("/{patient_id}/sessions")
-def get_patient_sessions(patient_id: int, status: str | None = None):
+def get_patient_sessions(patient_id: int, status: Optional[str] = None):
     """
     Fetches sessions with nested therapist info AND all assigned exercises.
     """
