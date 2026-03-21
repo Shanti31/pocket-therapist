@@ -2,10 +2,19 @@
 
 import { useState, useEffect } from 'react'
 
+interface Exercise {
+  id: string
+  name: string
+  description: string
+  videoUrl: string
+  category: string
+  difficulty: string
+}
+
 export default function BibliothequePage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filter, setFilter] = useState('all')
-  const [exercises, setExercises] = useState([])
+  const [exercises, setExercises] = useState<Exercise[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [editingId, setEditingId] = useState(null)
