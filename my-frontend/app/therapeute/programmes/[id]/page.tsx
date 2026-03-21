@@ -4,18 +4,39 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import React from 'react'
 
+interface Exercise {
+  id: string
+  exercise_id: string
+  name: string
+  description: string
+  videoUrl: string
+  category: string
+  duration: string
+  sets: number
+  reps: number
+}
+
+interface Program {
+  id: string
+  name: string
+  description: string
+  therapist_id: string
+  createdDate: string
+  lastModified: string
+}
+
 export default function ProgramDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params)
   const [isEditing, setIsEditing] = useState(false)
   const [showExerciseModal, setShowExerciseModal] = useState(false)
-  const [editingExercise, setEditingExercise] = useState(null)
+  const [editingExercise, setEditingExercise] = useState<string | null>(null)
   const [editFormData, setEditFormData] = useState({ duration: '', sets: '', reps: '' })
-  const [exercises, setExercises] = useState([])
-  const [availableExercises, setAvailableExercises] = useState([])
+  const [exercises, setExercises] = useState<Exercise[]>([])
+  const [availableExercises, setAvailableExercises] = useState<Exercise[]>([])
   const [loadingExercises, setLoadingExercises] = useState(false)
   const [loadingProgram, setLoadingProgram] = useState(true)
   const [playingVideoUrl, setPlayingVideoUrl] = useState<string | null>(null)
-  const [program, setProgram] = useState<any>(null)
+  const [program, setProgram] = useState<Program | null>(null)
 
   // Fetch program from API on load
   useEffect(() => {
