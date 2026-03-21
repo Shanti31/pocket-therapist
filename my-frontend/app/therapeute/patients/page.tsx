@@ -4,16 +4,39 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
+interface Patient {
+  id: string
+  first_name: string
+  last_name: string
+  age: number | null
+  email: string
+  exercise_difficulty: number
+  adhesion: number
+  pain_level: number
+  number_of_programs: number
+}
+
+interface PatientForm {
+  first_name: string
+  last_name: string
+  age: number | null
+  email: string
+  exercise_difficulty: number
+  adhesion: number
+  pain_level: number
+  number_of_programs: number
+}
+
 export default function PatientsPage() {
   const searchParams = useSearchParams()
   const [searchTerm, setSearchTerm] = useState('')
-  const [patients, setPatients] = useState([])
+  const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(
     searchParams.get('createPatient') === 'true'
   )
-  const [newPatient, setNewPatient] = useState({
+  const [newPatient, setNewPatient] = useState<PatientForm>({
     first_name: '',
     last_name: '',
     age: null,
