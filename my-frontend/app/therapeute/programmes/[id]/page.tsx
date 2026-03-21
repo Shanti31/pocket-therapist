@@ -11,6 +11,7 @@ interface Exercise {
   description: string
   videoUrl: string
   category: string
+  difficulty?: any
   duration: string
   sets: number
   reps: number
