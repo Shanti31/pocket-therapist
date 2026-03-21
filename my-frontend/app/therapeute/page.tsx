@@ -4,11 +4,22 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
+interface Program {
+  id: string
+  name: string
+  description: string
+  duration: string
+  patients: number
+  status: string
+  exercises: any[]
+  therapist_id: string
+}
+
 export default function TherapeuteDashboard() {
   const searchParams = useSearchParams()
   const [searchTerm, setSearchTerm] = useState('')
   const [filter, setFilter] = useState('all')
-  const [programs, setPrograms] = useState([])
+  const [programs, setPrograms] = useState<Program[]>([])
   const [showModal, setShowModal] = useState(false)
   const [newProgram, setNewProgram] = useState({ name: '', description: '' })
   const [loading, setLoading] = useState(true)
