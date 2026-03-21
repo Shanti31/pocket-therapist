@@ -7,7 +7,7 @@ export default function BibliothequePage() {
   const [filter, setFilter] = useState('all')
   const [exercises, setExercises] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const [editingId, setEditingId] = useState(null)
   const [editData, setEditData] = useState({})
   const [playingVideoUrl, setPlayingVideoUrl] = useState<string | null>(null)
