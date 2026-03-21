@@ -1,0 +1,116 @@
+version: '3.9'
+
+# ====================================================
+# Services Docker pour Pocket Therapist
+# ====================================================
+
+services:
+  # ====================================================
+  # Backend FastAPI
+  # ====================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    
+    container_name: pocket-therapist-backend
+    
+    # Environment variables (à personnaliser avec .env)
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - PORT=8000
+    
+    # Port mapping: host:container
+    ports:
+      - "8000:8000"
+    
+    # Volumes pour développement (hot reload)
+    volumes:
+      - ./backend:/app
+    
+    # Commande de démarrage
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Healthcheck
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    
+    # Logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ====================================================
+  # Frontend Next.js
+  # ====================================================
+  frontend:
+    build:
+      context: ./my-frontend
+      dockerfile: Dockerfile
+    
+    container_name: pocket-therapist-frontend
+    
+    # Environment variables
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NODE_ENV=development
+      - PORT=3000
+    
+    # Port mapping
+    ports:
+      - "3000:3000"
+    
+    # Volumes pour développement (hot reload)
+    volumes:
+      - ./my-frontend:/app
+      - /app/node_modules
+      - /app/.next
+    
+    # Relations entre services
+    depends_on:
+      backend:
+        condition: service_healthy
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Healthcheck
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    
+    # Logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# ====================================================
+# Networks
+# ====================================================
+networks:
+  default:
+    name: pocket-therapist-network
+    driver: bridge
+
+# ====================================================
+# Volumes (persistant data)
+# ====================================================
+volumes:
+  backend_data:
+  frontend_data:

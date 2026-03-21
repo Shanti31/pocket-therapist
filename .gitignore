@@ -247,3 +247,27 @@ tags
 # Ignore all local history of files
 .history
 .ionide
+
+### Docker ###
+# Docker images
+*.docker
+.docker/
+
+# Docker Compose
+docker-compose.override.yml
+docker-compose.prod.override.yml
+
+# Container data
+.dockerdata/
+container-volumes/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE Docker Extensions
+.devcontainer/
+
+# Misc
+*.log
