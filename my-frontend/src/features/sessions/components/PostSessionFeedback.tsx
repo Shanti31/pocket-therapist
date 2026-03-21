@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import type { SessionFeedback, DifficultyLevel, FatigueLevel } from '../types';
 import { DIFFICULTY_LABELS, FATIGUE_LABELS } from '../types';
+import { saveSessionFeedback } from '../api/feedback';
 
 interface PostSessionFeedbackProps {
   sessionId: string;
+  patientId?: number;
   onSubmit: (feedback: SessionFeedback) => void;
 }
 
@@ -26,13 +28,33 @@ const FATIGUE_INFO: Record<FatigueLevel, { emoji: string; color: string; activeC
   high:     { emoji: '🥱', color: 'border-gray-200 text-gray-700', activeColor: 'bg-red-500    text-white border-red-500' },
 };
 
-export default function PostSessionFeedback({ sessionId, onSubmit }: PostSessionFeedbackProps) {
+export default function PostSessionFeedback({ sessionId, patientId = 1, onSubmit }: PostSessionFeedbackProps) {
   const [painRating, setPainRating] = useState(1);
   const [difficulty, setDifficulty] = useState<DifficultyLevel>('medium');
   const [fatigue, setFatigue] = useState<FatigueLevel>('moderate');
   const [comment, setComment] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setIsSaving(true);
+    
+    // Save to Supabase
+    const saved = await saveSessionFeedback({
+      session_id: sessionId,
+      patient_id: patientId,
+      pain_rating: painRating,
+      fatigue,
+      difficulty,
+      comment: comment.trim() || undefined,
+    });
+
+    if (saved) {
+      console.log('Feedback saved to Supabase');
+    }
+
+    setIsSaving(false);
+
+    // Call the onSubmit callback
     onSubmit({
       sessionId,
       painRating,
@@ -151,9 +173,14 @@ export default function PostSessionFeedback({ sessionId, onSubmit }: PostSession
       <div className="p-4 border-t border-gray-200 bg-white">
         <button
           onClick={handleSubmit}
-          className="w-full py-4 bg-green-600 text-white text-lg font-bold rounded-xl hover:bg-green-700 transition-colors"
+          disabled={isSaving}
+          className={`w-full py-4 text-white text-lg font-bold rounded-xl transition-colors ${
+            isSaving
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-green-600 hover:bg-green-700'
+          }`}
         >
-          Terminer la séance ✓
+          {isSaving ? 'Enregistrement...' : 'Terminer la séance ✓'}
         </button>
       </div>
     </div>

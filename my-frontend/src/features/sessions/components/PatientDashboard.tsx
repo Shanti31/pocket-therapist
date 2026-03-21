@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import type { Therapist, Session, PatientProgress } from '../types';
+import { loadExercisesWithVideos } from '../mock-data';
 import TherapistList from './TherapistList';
 import PendingSessions from './PendingSessions';
 import CompletedSessions from './CompletedSessions';
@@ -15,6 +16,7 @@ interface PatientDashboardProps {
   completedSessions: Session[];
   progress: PatientProgress;
   patientId?: number;
+  patientName?: string;
 }
 
 export default function PatientDashboard({
@@ -23,18 +25,41 @@ export default function PatientDashboard({
   completedSessions,
   progress,
   patientId,
+  patientName = 'Patient',
 }: PatientDashboardProps) {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [activeSession, setActiveSession] = useState<Session | null>(null);
 
-  const activeSession = pendingSessions.find((s) => s.id === activeSessionId);
+  const handleStartSession = useCallback(
+    async (sessionId: string) => {
+      const session = pendingSessions.find((s) => s.id === sessionId);
+      if (!session) return;
+
+      // Load videos from Supabase
+      const exercisesWithVideos = await loadExercisesWithVideos(session.exercises);
+
+      setActiveSession({
+        ...session,
+        exercises: exercisesWithVideos,
+      });
+      setActiveSessionId(sessionId);
+    },
+    [pendingSessions]
+  );
 
   // If a session is active, show the full-screen SessionRunner
   if (activeSession) {
     return (
       <SessionRunner
         session={activeSession}
-        onComplete={() => setActiveSessionId(null)}
-        onCancel={() => setActiveSessionId(null)}
+        onComplete={() => {
+          setActiveSessionId(null);
+          setActiveSession(null);
+        }}
+        onCancel={() => {
+          setActiveSessionId(null);
+          setActiveSession(null);
+        }}
       />
     );
   }
@@ -42,8 +67,8 @@ export default function PatientDashboard({
   return (
     <div className="px-4 py-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Bonjour 👋</h1>
-        <p className="text-gray-500 text-sm mt-1">Voici votre programme du jour</p>
+        <h1 className="text-3xl font-bold text-gray-900">Bonjour {patientName} ! 👋</h1>
+        <p className="text-gray-500 text-sm mt-1">Prêt pour votre séance d'aujourd'hui ?</p>
       </div>
 
       {/* Feature 6 progression globale */}
@@ -52,7 +77,7 @@ export default function PatientDashboard({
       {/* Feature 3 – aperçu + démarrage */}
       <PendingSessions
         sessions={pendingSessions}
-        onStartSession={(id) => setActiveSessionId(id)}
+        onStartSession={handleStartSession}
       />
 
       <TherapistList therapists={therapists} />

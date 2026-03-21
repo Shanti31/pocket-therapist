@@ -34,18 +34,39 @@ export default function PatientsPage() {
   // Fetch patients from API on page load
   useEffect(() => {
     const fetchPatients = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch('http://localhost:8000/api/patients')
-        if (!response.ok) throw new Error('Failed to fetch patients')
-        const { data } = await response.json()
-        setPatients(data || [])
-        setError(null)
-      } catch (err) {
-        console.error('Error fetching patients:', err)
-        setError(err instanceof Error ? err.message : 'Unknown error')
-      } finally {
-        setLoading(false)
+      let retries = 3
+      let lastError: Error | null = null
+      
+      while (retries > 0) {
+        try {
+          setLoading(true)
+          const response = await fetch('http://localhost:8000/api/patients', {
+            headers: { 'Cache-Control': 'no-cache' }
+          })
+          
+          if (!response.ok) throw new Error(`HTTP ${response.status}: Failed to fetch patients`)
+          
+          const { data } = await response.json()
+          setPatients(data || [])
+          setError(null)
+          return // Success - exit the retry loop
+        } catch (err) {
+          lastError = err instanceof Error ? err : new Error('Unknown error')
+          retries--
+          
+          if (retries > 0) {
+            console.warn(`Retrying... (${retries} attempts left)`)
+            await new Promise(resolve => setTimeout(resolve, 500)) // Wait before retrying
+          }
+        } finally {
+          setLoading(false)
+        }
+      }
+      
+      // If we got here, all retries failed
+      if (lastError) {
+        console.error('Error fetching patients:', lastError)
+        setError(lastError.message)
       }
     }
 

@@ -96,24 +96,37 @@ class PatientNotePayload(BaseModel):
 @router.get("/")
 def get_all_patients():
     try:
-        response = supabase.table("patients").select("*").execute()
-        return {"status": "success", "data": response.data}
+        print("[API] Fetching all patients...")
+        
+        # Simple query with timeout handling
+        response = supabase.table("patients").select("id, first_name, last_name, email, exercise_difficulty, adhesion, pain_level").execute()
+        
+        print(f"[API] Retrieved {len(response.data) if response.data else 0} patients")
+        return {"status": "success", "data": response.data or []}
     except Exception as e:
+        print(f"[ERROR] Failed to fetch patients: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 
 @router.get("/{patient_id}")
 def get_single_patient(patient_id: int):
     try:
+        print(f"[API] Fetching patient {patient_id}...")
         response = (
             supabase.table("patients")
-            .select("*")
+            .select("id, first_name, last_name, email, age, exercise_difficulty, adhesion, pain_level, number_of_programs")
             .eq("id", patient_id)
             .single()
             .execute()
         )
+        print(f"[API] Retrieved patient {patient_id}")
         return {"status": "success", "data": response.data}
     except Exception as e:
+        print(f"[ERROR] Failed to fetch patient {patient_id}: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=404, detail="Patient not found.")
 
 
@@ -135,16 +148,16 @@ def get_patient_therapists(patient_id: int):
 def get_patient_sessions(patient_id: int, status: Optional[str] = None):
     """
     Fetches sessions with nested therapist info AND all assigned exercises.
+    Simplified version to avoid complex nested JOINs.
     """
     try:
-        # THE DEEP JOIN: session -> therapist AND session -> exercises -> video_metadata
-        # THE DEEP JOIN: Now includes session_feedback
-        # WARNING: Ensure videos_metadata matches your actual Supabase table name!
+        print(f"[API] Fetching sessions for patient {patient_id}...")
+        
+        # Simplified query: just get sessions with therapist and exercises
+        # Feedback is fetched separately if needed
         query = (
             supabase.table("sessions")
-            .select(
-                "*, therapists(*), session_exercises(*, videos_metadata(*)), session_feedback(*)"
-            )
+            .select("*, therapists(*), session_exercises(*, videos_metadata(*))")
             .eq("patient_id", patient_id)
         )
 
@@ -152,8 +165,12 @@ def get_patient_sessions(patient_id: int, status: Optional[str] = None):
             query = query.eq("status", status)
 
         res = query.execute()
+        print(f"[API] Retrieved {len(res.data)} sessions")
         return {"status": "success", "data": res.data}
     except Exception as e:
+        print(f"[ERROR] Failed to fetch sessions: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Failed to fetch sessions: {str(e)}"
         )

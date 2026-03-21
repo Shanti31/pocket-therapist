@@ -30,10 +30,10 @@ export default function PendingSessions({ sessions, onStartSession }: PendingSes
       <h2 className="text-lg font-semibold text-gray-900 mb-3">Séances à faire</h2>
       <div className="space-y-3">
         {sessions.map((session) => (
-          <button
+          <div
             key={session.id}
             onClick={() => setPreviewSession(session)}
-            className="w-full text-left p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-blue-300 hover:shadow-md active:scale-98 transition-all"
+            className="w-full text-left p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-blue-300 hover:shadow-md active:scale-98 transition-all cursor-pointer"
           >
             <div className="flex justify-between items-start mb-2">
               <div>
@@ -52,7 +52,10 @@ export default function PendingSessions({ sessions, onStartSession }: PendingSes
               )}
             </div>
             <button
-              onClick={() => onStartSession(session.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onStartSession(session.id);
+              }}
               className="w-full py-2.5 bg-[#00BAA8] text-white font-medium rounded-lg hover:bg-[#008C7E] transition-colors"
             >
               Démarrer

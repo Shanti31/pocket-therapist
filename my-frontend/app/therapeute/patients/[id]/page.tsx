@@ -9,8 +9,10 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
   const [patient, setPatient] = useState<any>(null)
   const [assignedPrograms, setAssignedPrograms] = useState<any[]>([])
   const [availablePrograms, setAvailablePrograms] = useState<any[]>([])
+  const [feedbacks, setFeedbacks] = useState<any[]>([])
   const [loadingPatient, setLoadingPatient] = useState(true)
   const [loadingPrograms, setLoadingPrograms] = useState(true)
+  const [loadingFeedbacks, setLoadingFeedbacks] = useState(true)
   const [showAssignModal, setShowAssignModal] = useState(false)
   const [showAdaptModal, setShowAdaptModal] = useState(false)
   const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null)
@@ -82,6 +84,27 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
 
     fetchPrograms()
   }, [])
+
+  // Fetch patient feedbacks
+  useEffect(() => {
+    const fetchFeedbacks = async () => {
+      try {
+        setLoadingFeedbacks(true)
+        const response = await fetch(`http://localhost:8000/api/patient-feedback/${id}`)
+        if (!response.ok) throw new Error('Failed to fetch feedbacks')
+        const { data } = await response.json()
+        setFeedbacks(data || [])
+      } catch (err) {
+        console.error('Error fetching feedbacks:', err)
+      } finally {
+        setLoadingFeedbacks(false)
+      }
+    }
+
+    if (id) {
+      fetchFeedbacks()
+    }
+  }, [id])
 
   if (loadingPatient) {
     return (
@@ -256,6 +279,77 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
             ← Retour
           </Link>
         </div>
+      </div>
+
+      {/* Patient Feedbacks */}
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+          <h2 className="text-xl font-bold text-gray-900">💬 Feedbacks des Séances ({feedbacks.length})</h2>
+        </div>
+
+        {loadingFeedbacks ? (
+          <div className="px-6 py-12 text-center text-gray-500">
+            <p>Chargement des feedbacks...</p>
+          </div>
+        ) : feedbacks.length > 0 ? (
+          <div className="divide-y divide-gray-200">
+            {feedbacks.map((feedback) => (
+              <div key={feedback.id} className="p-6 hover:bg-gray-50 transition-colors">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      📅 {new Date(feedback.created_at).toLocaleDateString('fr-FR', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    Session: {feedback.session_id.substring(0, 8)}...
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  {/* Douleur */}
+                  <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                    <p className="text-xs font-medium text-gray-600 mb-1">Douleur</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{['😊', '🙂', '😐', '😕', '😣', '😖', '😫', '😰', '🤕', '😵'][feedback.pain_level] || '❓'}</span>
+                      <span className="text-lg font-bold text-blue-700">{feedback.pain_level}/10</span>
+                    </div>
+                  </div>
+
+                  {/* Effort */}
+                  <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+                    <p className="text-xs font-medium text-gray-600 mb-1">Effort</p>
+                    <div className="flex items-center gap-2">
+                      {feedback.effort_level <= 3 && <span className="text-2xl">⚡</span>}
+                      {feedback.effort_level > 3 && feedback.effort_level <= 6 && <span className="text-2xl">😮‍💨</span>}
+                      {feedback.effort_level > 6 && <span className="text-2xl">🥱</span>}
+                      <span className="text-lg font-bold text-orange-700">{feedback.effort_level}/10</span>
+                    </div>
+                  </div>
+
+                  {/* Notes */}
+                  <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                    <p className="text-xs font-medium text-gray-600 mb-1">Commentaire</p>
+                    <p className="text-sm text-green-800 line-clamp-2">
+                      {feedback.notes || '(Aucun commentaire)'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="px-6 py-12 text-center text-gray-500">
+            <p className="text-lg">Aucun feedback de séance pour ce patient.</p>
+          </div>
+        )}
       </div>
 
       {/* Assigned Programs */}
