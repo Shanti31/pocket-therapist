@@ -26,13 +26,21 @@ export default function PatientNotesCard({ patientId, initialNote = '' }: Patien
     setSaved(false);
 
     try {
-      // TODO: replace with real API call, e.g.:
-      // await fetch(`/api/patients/${patientId}/notes`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ content: note.trim() }),
-      // });
-      await new Promise((r) => setTimeout(r, 600)); // simulate latency
+      if (!patientId) {
+        throw new Error("No patient ID provided");
+      }
+      
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+      const res = await fetch(`${API_BASE_URL}/patients/${patientId}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: note.trim() }),
+      });
+      
+      if (!res.ok) {
+        throw new Error("Failed to save note");
+      }
+      
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch {

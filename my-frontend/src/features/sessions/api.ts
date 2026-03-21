@@ -37,3 +37,16 @@ export async function updateSessionStatus(patientId: number, sessionId: string, 
   });
   return res.ok;
 }
+
+export async function submitSessionFeedback(
+  patientId: number,
+  sessionId: string,
+  feedback: { pain_level: number; effort_level: number; notes?: string }
+): Promise<boolean> {
+  const res = await fetch(`${API_BASE_URL}/patients/${patientId}/sessions/${sessionId}/feedback`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(feedback),
+  });
+  return res.ok;
+}

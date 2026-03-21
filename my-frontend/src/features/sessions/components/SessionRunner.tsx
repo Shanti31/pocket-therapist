@@ -7,6 +7,7 @@ import type {
   ExerciseSkipFeedback,
   SessionFeedback,
   ExerciseResult,
+  DifficultyLevel,
 } from '../types';
 import SkipFeedbackSheet from './SkipFeedbackSheet';
 import PostSessionFeedback from './PostSessionFeedback';
@@ -20,11 +21,12 @@ type Phase = 'pre_pain' | 'video' | 'exercise';
 
 interface SessionRunnerProps {
   session: Session;
+  patientId?: number;
   onComplete: () => void;
   onCancel: () => void;
 }
 
-export default function SessionRunner({ session, onComplete, onCancel }: SessionRunnerProps) {
+export default function SessionRunner({ session, patientId, onComplete, onCancel }: SessionRunnerProps) {
   // ── Navigation state ────────────────────────────────────────────────────
   const [currentIndex, setCurrentIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('pre_pain');
@@ -152,11 +154,30 @@ export default function SessionRunner({ session, onComplete, onCancel }: Session
     goToNext(true, customReason ?? reason);
   };
 
-  const handleFeedbackSubmit = (feedback: SessionFeedback) => {
-    console.log('Session feedback:', feedback);
-    console.log('Skipped exercises:', skippedExercises);
-    console.log('Exercise results:', exerciseResults);
-    onComplete();
+  const handleFeedbackSubmit = async (feedback: SessionFeedback) => {
+    try {
+      if (patientId) {
+        // Map frontend difficulty to backend effort_level (1-3)
+        const difficultyToEffort: Record<DifficultyLevel, number> = {
+          easy: 1,
+          medium: 2,
+          hard: 3,
+        };
+
+        const { submitSessionFeedback } = await import('../api');
+        await submitSessionFeedback(patientId, session.id, {
+          pain_level: feedback.painRating,
+          effort_level: difficultyToEffort[feedback.difficulty],
+          notes: feedback.comment,
+        });
+      } else {
+        console.warn('No patientId provided, skipping backend feedback submission');
+      }
+    } catch (e) {
+      console.error('Failed to submit session feedback:', e);
+    } finally {
+      onComplete();
+    }
   };
 
   // ── Full-screen feedback ──────────────────────────────────────────────────

@@ -33,6 +33,7 @@ export default function PatientDashboard({
     return (
       <SessionRunner
         session={activeSession}
+        patientId={patientId}
         onComplete={() => setActiveSessionId(null)}
         onCancel={() => setActiveSessionId(null)}
       />
