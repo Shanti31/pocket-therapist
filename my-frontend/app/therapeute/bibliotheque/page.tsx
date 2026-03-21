@@ -17,7 +17,7 @@ export default function BibliothequePage() {
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [editingId, setEditingId] = useState(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [editData, setEditData] = useState({})
   const [playingVideoUrl, setPlayingVideoUrl] = useState<string | null>(null)
 
