@@ -18,6 +18,7 @@
 8. [Base de données](#base-de-données)
 9. [API REST](#api-rest)
 10. [Flux de données](#flux-de-données)
+11. [Déploiement & Hébergement](#-déploiement--hébergement)
 
 ---
 
@@ -792,6 +793,145 @@ h1: text-4xl font-bold
 h2: text-xl font-bold
 body: text-sm
 ```
+
+---
+
+## 🚀 Déploiement & Hébergement
+
+### Options de déploiement rapides
+
+| Option | Plateforme | Coût | Setup | Idéal pour |
+|--------|-----------|------|-------|-----------|
+| **Render** | Cloud ☁️ | Gratuit | 5 min | Production (FREE!) |
+| **Docker Local** | Docker Compose | Gratuit | 3 min | Développement |
+| **Détails complets** | [DEPLOYMENT.md](./DEPLOYMENT.md) | Voir doc | Varié | AWS/Azure/Heroku |
+
+### Option 1 : Déployer sur Render (Recommandé - Gratuit)
+
+La façon la plus simple et **gratuite** de mettre en production. Aucune carte bancaire requise!
+
+#### Prérequis
+- Compte GitHub avec ce repository
+- Compte Supabase (gratuit: https://supabase.com)
+- Compte Render (gratuit: https://render.com)
+
+#### 5 étapes de déploiement
+
+**Étape 1 : Préparer les variables d'environnement**
+
+Copier `.env.example` et remplir les valeurs:
+```bash
+SUPABASE_URL=https://<YOUR_PROJECT_ID>.supabase.co
+SUPABASE_KEY=<YOUR_SUPABASE_PUBLIC_KEY>
+SUPABASE_SERVICE_ROLE_KEY=<YOUR_SUPABASE_SERVICE_ROLE_KEY>
+```
+
+⚠️ **Ne jamais committer les secrets dans Git!** Obtenir vos clés depuis:
+- Supabase Dashboard → Settings → API keys
+
+**Étape 2 : Créer un service Backend sur Render**
+
+1. Aller à https://dashboard.render.com
+2. Cliquer "New +" → "Web Service"
+3. Sélectionner "Deploy an existing Docker image"
+4. URL image: `<your-github-repo>#main` (Docker auto-detect)
+5. Environnement: Ajouter les variables `.env`
+6. Plan: Free ✓
+7. Déployer
+
+**Étape 3 : Créer un service Frontend sur Render**
+
+1. "New +" → "Static Site"
+2. Connecter repository GitHub
+3. Build command: `npm run build`
+4. Publish directory: `my-frontend/.next`
+5. Environnement: 
+   - `NEXT_PUBLIC_API_URL=<backend-render-url>`
+6. Deploy
+
+**Étape 4 : Tester l'intégration**
+
+```bash
+# Vérifier que les services sont UP
+curl https://<your-backend>.onrender.com/api/patients
+curl https://<your-frontend>.onrender.com
+```
+
+**Étape 5 : Configurer l'auto-déploiement**
+
+Les services Render se mettent à jour automatiquement à chaque push sur `main` ✓
+
+#### URLs après déploiement
+
+```
+Frontend:  https://<app-name>.onrender.com
+Backend:   https://<app-backend>.onrender.com
+Database:  Supabase hosted (déjà configuré)
+```
+
+---
+
+### Option 2 : Déployer localement avec Docker
+
+Pour tester en local ou sur votre machine personnelle.
+
+#### Installation rapide (3 commandes)
+
+```bash
+# 1. Cloner le repository
+git clone <your-repo>
+cd pocket-therapist
+
+# 2. Créer .env depuis le template
+cp .env.example .env
+# ⚠️ Remplir SUPABASE_URL, SUPABASE_KEY, SUPABASE_SERVICE_ROLE_KEY
+
+# 3. Démarrer les services
+docker-compose up --build
+```
+
+#### Accéder aux services
+
+```
+Frontend:  http://localhost:3000
+Backend:   http://localhost:8000
+API Docs:  http://localhost:8000/docs
+```
+
+#### Arrêter les services
+
+```bash
+docker-compose down
+```
+
+**Plus de détails:** Voir [README-DOCKER.md](./README-DOCKER.md) pour les commandes avancées.
+
+---
+
+### Option 3 : Autres plateformes
+
+Pour AWS, Azure, Heroku, Railway, etc., voir le guide complet: **[DEPLOYMENT.md](./DEPLOYMENT.md)**
+
+Ce document couvre:
+- ✅ Heroku + procfiles
+- ✅ Docker registries (DockerHub, Azure ACR)
+- ✅ AWS ECS + Lightsail
+- ✅ Azure Container Instances
+- ✅ Troubleshooting et logs
+- ✅ Monitoring en production
+
+---
+
+### Checklist pré-production
+
+Avant de déployer en production:
+
+- [ ] .env configuré avec **TOUS** les secrets (pas de credentials en dur!)
+- [ ] Tests locaux avec `docker-compose up`
+- [ ] Backend `/api/patients` répond correctement
+- [ ] Frontend charge les vidéos depuis Supabase Storage
+- [ ] Feedbacks s'enregistrent en base de données
+- [ ] Ajouter SUPABASE_SERVICE_ROLE_KEY à Supabase Settings → API keys
 
 ---
 
