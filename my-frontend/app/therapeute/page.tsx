@@ -182,56 +182,95 @@ export default function TherapeuteDashboard() {
         </div>
       )}
 
-      {/* Programs List - Table view */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-bold text-gray-900">📚 Liste des Programmes</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Nom</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Description</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Durée</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">👥 Patients</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPrograms.length > 0 ? (
-                filteredPrograms.map((program, index) => (
-                  <tr key={program.id} className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}>
-                    <td className="px-6 py-4 font-medium text-gray-900">{program.name}</td>
-                    <td className="px-6 py-4 text-gray-600 text-sm">{program.description}</td>
-                    <td className="px-6 py-4 text-center text-gray-900">⏱️ {program.duration}</td>
-                    <td className="px-6 py-4 text-center font-semibold text-gray-900">{program.patients}</td>
-                    <td className="px-6 py-4 text-center space-x-2">
-                      <Link
-                        href={`/therapeute/programmes/${program.id}`}
-                        className="text-indigo-600 hover:text-indigo-800 font-medium"
-                      >
-                        Voir détails
-                      </Link>
-                      <button
-                        onClick={() => handleDeleteProgram(program.id, program.name)}
-                        className="text-red-600 hover:text-red-800 font-medium ml-3"
-                      >
-                        Supprimer
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
-                    <p className="text-lg">No programs in the list</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      {/* Programs Grid - Card view */}
+      <div>
+        <h2 className="text-lg font-bold text-gray-900 mb-4">📚 Liste des Programmes</h2>
+        {filteredPrograms.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPrograms.map((program) => (
+              <div
+                key={program.id}
+                className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col"
+              >
+                {/* Content Container */}
+                <div className="p-6 flex flex-col flex-grow">
+                  {/* Therapy Type Badge */}
+                  <div className="flex justify-between items-start gap-4 mb-3">
+                    <div></div>
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      Physiothérapie
+                    </span>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="font-bold text-xl text-gray-900 mb-2 line-clamp-2">
+                    {program.name}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                    {program.description || 'Programme de rééducation'}
+                  </p>
+
+                  {/* Info Grid */}
+                  <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Exercices</p>
+                      <p className="text-lg font-bold text-gray-900">
+                        {program.exercises?.length || 0}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-500 font-medium">Durée</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {program.duration}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Exercises Preview */}
+                  <div className="mb-4 flex-grow">
+                    <p className="text-xs font-medium text-gray-500 mb-2 uppercase">
+                      Exercices inclus
+                    </p>
+                    <div className="space-y-1">
+                      {program.exercises?.slice(0, 3).map((exercise: any, idx: number) => (
+                        <p key={idx} className="text-sm text-gray-700">
+                          {idx + 1}. {exercise.videos_metadata?.title || `Exercice ${idx + 1}`}
+                        </p>
+                      ))}
+                      {(program.exercises?.length || 0) > 3 && (
+                        <p className="text-xs text-gray-500 italic mt-2">
+                          +{(program.exercises?.length || 0) - 3} autres...
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions Footer */}
+                <div className="p-6 pt-0 flex gap-2">
+                  <Link
+                    href={`/therapeute/programmes/${program.id}`}
+                    className="flex-1 text-center bg-[#00BAA8] hover:bg-[#008C7E] text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                  >
+                    Voir détails
+                  </Link>
+                  <button
+                    onClick={() => handleDeleteProgram(program.id, program.name)}
+                    className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 font-medium transition-colors"
+                  >
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-gray-50 rounded-lg p-12 text-center">
+            <p className="text-lg text-gray-500">Aucun programme trouvé.</p>
+          </div>
+        )}
       </div>
 
       {/* Create Program Modal */}

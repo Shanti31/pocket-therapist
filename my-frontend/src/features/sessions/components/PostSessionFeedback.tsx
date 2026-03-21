@@ -52,7 +52,7 @@ export default function PostSessionFeedback({
                 key={i}
                 onClick={() => setPainRating(i + 1)}
                 className={`text-2xl p-1 rounded transition-transform ${
-                  painRating === i + 1 ? 'scale-125 bg-blue-100' : 'opacity-50 hover:opacity-80'
+                  painRating === i + 1 ? 'scale-125 bg-[#e9ebef]' : 'opacity-50 hover:opacity-80'
                 }`}
               >
                 {emoji}
@@ -77,7 +77,7 @@ export default function PostSessionFeedback({
                 onClick={() => setDifficulty(level)}
                 className={`flex-1 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
                   difficulty === level
-                    ? 'bg-blue-600 text-white border-blue-600'
+                    ? 'bg-[#00BAA8] text-white border-[#00BAA8]'
                     : 'border-gray-200 text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -99,7 +99,7 @@ export default function PostSessionFeedback({
                 onClick={() => setFatigue(level)}
                 className={`flex-1 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
                   fatigue === level
-                    ? 'bg-blue-600 text-white border-blue-600'
+                    ? 'bg-[#00BAA8] text-white border-[#00BAA8]'
                     : 'border-gray-200 text-gray-700 hover:bg-gray-50'
                 }`}
               >

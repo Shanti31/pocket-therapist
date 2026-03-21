@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Plus, LayoutDashboard, BookOpen, Library, Users, Menu, X } from 'lucide-react'
 
 export default function TherapeuteLayout({
   children,
@@ -11,52 +12,90 @@ export default function TherapeuteLayout({
 }) {
   const [activeMenu, setActiveMenu] = useState('programmes')
   const [showActionMenu, setShowActionMenu] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const router = useRouter()
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-lg flex flex-col">
+      {/* Sidebar - Hidden on mobile, visible on md+ */}
+      <aside className={`${
+        mobileMenuOpen ? 'fixed' : 'hidden'
+      } md:static md:flex w-full md:w-64 bg-white shadow-lg flex-col z-40`}>
         {/* Logo */}
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-indigo-600">PT Therapist</h2>
-          <p className="text-sm text-gray-500 mt-1">Tableau de Bord</p>
+        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+          <div>
+            <h2 className="text-xl md:text-2xl font-bold text-[#00BAA8]">Thérapeute de Poche</h2>
+            <p className="text-xs md:text-sm text-gray-500 mt-1">Interface Thérapeute</p>
+          </div>
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="md:hidden text-gray-600 hover:text-gray-900"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 mt-6 px-4 space-y-2">
+        <nav className="flex-1 mt-6 px-4 space-y-1">
           <Link
-            href="/therapeute"
-            onClick={() => setActiveMenu('programmes')}
-            className={`flex items-center px-4 py-3 rounded-lg font-medium transition-colors ${
-              activeMenu === 'programmes'
-                ? 'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600'
-                : 'text-gray-700 hover:bg-gray-50'
+            href="/therapeute/dashboard"
+            onClick={() => {
+              setActiveMenu('dashboard')
+              setMobileMenuOpen(false)
+            }}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+              activeMenu === 'dashboard'
+                ? 'bg-[#00BAA8] text-white'
+                : 'text-gray-700 hover:bg-gray-100'
             }`}
           >
-            Programmes
+            <LayoutDashboard className="w-5 h-5" />
+            <span className="text-sm md:text-base">Dashboard</span>
+          </Link>
+          <Link
+            href="/therapeute"
+            onClick={() => {
+              setActiveMenu('programmes')
+              setMobileMenuOpen(false)
+            }}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+              activeMenu === 'programmes'
+                ? 'bg-[#00BAA8] text-white'
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            <BookOpen className="w-5 h-5" />
+            <span className="text-sm md:text-base">Programmes</span>
           </Link>
           <Link
             href="/therapeute/bibliotheque"
-            onClick={() => setActiveMenu('bibliotheque')}
-            className={`flex items-center px-4 py-3 rounded-lg font-medium transition-colors ${
+            onClick={() => {
+              setActiveMenu('bibliotheque')
+              setMobileMenuOpen(false)
+            }}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
               activeMenu === 'bibliotheque'
-                ? 'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600'
-                : 'text-gray-700 hover:bg-gray-50'
+                ? 'bg-[#00BAA8] text-white'
+                : 'text-gray-700 hover:bg-gray-100'
             }`}
           >
-            Bibliothèque
+            <Library className="w-5 h-5" />
+            <span className="text-sm md:text-base">Bibliothèque</span>
           </Link>
           <Link
             href="/therapeute/patients"
-            onClick={() => setActiveMenu('patients')}
-            className={`flex items-center px-4 py-3 rounded-lg font-medium transition-colors ${
+            onClick={() => {
+              setActiveMenu('patients')
+              setMobileMenuOpen(false)
+            }}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
               activeMenu === 'patients'
-                ? 'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600'
-                : 'text-gray-700 hover:bg-gray-50'
+                ? 'bg-[#00BAA8] text-white'
+                : 'text-gray-700 hover:bg-gray-100'
             }`}
           >
-            Patients
+            <Users className="w-5 h-5" />
+            <span className="text-sm md:text-base">Patients</span>
           </Link>
         </nav>
 
@@ -64,7 +103,7 @@ export default function TherapeuteLayout({
         <div className="p-4 border-t border-gray-200 relative">
           <button
             onClick={() => setShowActionMenu(!showActionMenu)}
-            className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors text-2xl"
+            className="w-full flex items-center justify-center gap-2 bg-[#00BAA8] text-white py-3 rounded-lg font-medium hover:bg-[#008C7E] transition-colors text-2xl"
           >
             +
           </button>
@@ -96,11 +135,33 @@ export default function TherapeuteLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
-        <div className="py-6 px-4 sm:px-6 lg:px-8">
-          {children}
+      <main className="flex-1 overflow-auto flex flex-col">
+        {/* Mobile Menu Toggle */}
+        <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+          <h1 className="text-lg font-bold text-[#00BAA8]">Thérapeute de Poche</h1>
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="text-gray-600 hover:text-gray-900"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
+        
+        {/* Content Area */}
+        <div className="flex-1 overflow-auto">
+          <div className="py-4 md:py-6 px-4 sm:px-6 lg:px-8">
+            {children}
+          </div>
         </div>
       </main>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 md:hidden z-30"
+          onClick={() => setMobileMenuOpen(false)}
+        ></div>
+      )}
     </div>
   )
 }

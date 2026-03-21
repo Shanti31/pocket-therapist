@@ -121,7 +121,7 @@ export default function SessionRunner({
       {/* Progress bar */}
       <div className="w-full bg-gray-200 h-1">
         <div
-          className="bg-blue-600 h-1 transition-all duration-300"
+          className="bg-[#00BAA8] h-1 transition-all duration-300"
           style={{ width: `${((currentIndex + 1) / exercises.length) * 100}%` }}
         />
       </div>
@@ -139,7 +139,7 @@ export default function SessionRunner({
         {/* Timer display */}
         {timeRemaining !== null && (
           <div className="mb-6 text-center">
-            <div className="text-5xl font-mono font-bold text-blue-600">
+            <div className="text-5xl font-mono font-bold text-[#00BAA8]">
               {formatTime(timeRemaining)}
             </div>
             {timeRemaining === 0 && (
@@ -159,7 +159,7 @@ export default function SessionRunner({
         {/* Repetitions display */}
         {currentExercise.repetitions && (
           <div className="mb-6 text-center">
-            <div className="text-5xl font-bold text-blue-600">
+            <div className="text-5xl font-bold text-[#00BAA8]">
               {currentExercise.repetitions}
             </div>
             <p className="text-gray-500 mt-1">répétitions</p>
@@ -171,7 +171,7 @@ export default function SessionRunner({
       <div className="p-4 border-t border-gray-200 bg-white space-y-2">
         <button
           onClick={goToNext}
-          className="w-full py-3.5 bg-blue-600 text-white text-lg font-semibold rounded-xl hover:bg-blue-700 transition-colors"
+          className="w-full py-3.5 bg-[#00BAA8] text-white text-lg font-semibold rounded-xl hover:bg-[#008C7E] transition-colors"
         >
           {isLastExercise ? 'Terminer' : 'Suivant →'}
         </button>

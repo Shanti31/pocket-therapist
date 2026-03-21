@@ -139,82 +139,109 @@ export default function PatientsPage() {
         </div>
       )}
 
-      {/* Patients List - Table view */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+      {/* Patients Grid - Card view */}
+      <div>
+        <div className="mb-4">
           <h2 className="text-lg font-bold text-gray-900">👥 Liste des Patients</h2>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Nom</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Prénom</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">% Adhésion</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Difficulté Exercice</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Douleur</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Programmes</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {!loading && filteredPatients.length > 0 ? (
-                filteredPatients.map((patient: any, index) => (
-                  <tr key={patient.id} className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}>
-                    <td className="px-6 py-4 font-medium text-gray-900">{patient.last_name || patient.first_name || 'N/A'}</td>
-                    <td className="px-6 py-4 text-gray-600">{patient.first_name || patient.last_name || 'N/A'}</td>
-                    <td className="px-6 py-4 text-gray-600 text-sm">{patient.email || 'N/A'}</td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-indigo-600 rounded-full"
-                            style={{ width: `${patient.adhesion || 0}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm font-semibold text-gray-700 w-10">{patient.adhesion || 0}%</span>
+        
+        {!loading && filteredPatients.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPatients.map((patient: any) => {
+              const initials = `${(patient.first_name || '?')[0]}${(patient.last_name || '?')[0]}`.toUpperCase()
+              return (
+                <Link
+                  key={patient.id}
+                  href={`/therapeute/patients/${patient.id}`}
+                  className="group"
+                >
+                  <div className="h-full bg-white border border-gray-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    {/* Header avec avatar et nom */}
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="w-14 h-14 bg-[#00BAA8] text-white rounded-full flex items-center justify-center font-semibold text-lg flex-shrink-0">
+                        {initials}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`px-3 py-1 rounded-full font-medium text-sm ${
-                        (patient.exercise_difficulty || 5) <= 3 ? 'bg-green-100 text-green-800' :
-                        (patient.exercise_difficulty || 5) <= 6 ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {patient.exercise_difficulty || 5}/10
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`px-3 py-1 rounded-full font-medium text-sm ${
-                        (patient.pain_level || 0) < 5 ? 'bg-green-100 text-green-800' :
-                        (patient.pain_level || 0) < 8 ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {patient.pain_level || 0}/10
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center font-semibold text-gray-900">{patient.number_of_programs || 0}</td>
-                    <td className="px-6 py-4 text-center">
-                      <Link
-                        href={`/therapeute/patients/${patient.id}`}
-                        className="text-indigo-600 hover:text-indigo-800 font-medium"
-                      >
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-lg font-semibold text-gray-900 truncate">
+                          {patient.first_name} {patient.last_name}
+                        </h4>
+                        <p className="text-sm text-gray-500 truncate">{patient.email || 'N/A'}</p>
+                      </div>
+                    </div>
+
+                    {/* Stats Section */}
+                    <div className="space-y-3 border-t border-gray-100 pt-4">
+                      {/* Adhésion */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Adhésion</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-[#00BAA8] rounded-full"
+                              style={{ width: `${patient.adhesion || 0}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-sm font-medium text-gray-900 w-8">{patient.adhesion || 0}%</span>
+                        </div>
+                      </div>
+
+                      {/* Difficulté */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Difficulté</span>
+                        <span
+                          className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                            (patient.exercise_difficulty || 5) <= 3
+                              ? 'bg-green-100 text-green-800'
+                              : (patient.exercise_difficulty || 5) <= 6
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                          }`}
+                        >
+                          {patient.exercise_difficulty || 5}/10
+                        </span>
+                      </div>
+
+                      {/* Douleur */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Douleur</span>
+                        <span
+                          className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                            (patient.pain_level || 0) < 5
+                              ? 'bg-green-100 text-green-800'
+                              : (patient.pain_level || 0) < 8
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                          }`}
+                        >
+                          {patient.pain_level || 0}/10
+                        </span>
+                      </div>
+
+                      {/* Programmes */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Programmes</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {patient.number_of_programs || 0}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <span className="text-[#00BAA8] hover:text-[#008C7E] font-medium transition text-sm group-hover:underline">
                         Voir profil →
-                      </Link>
-                    </td>
-                  </tr>
-                ))
-              ) : !loading && filteredPatients.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
-                    <p className="text-lg">Aucun patient trouvé.</p>
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
-        </div>
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        ) : !loading && filteredPatients.length === 0 ? (
+          <div className="bg-gray-50 rounded-lg p-12 text-center">
+            <p className="text-lg text-gray-500">Aucun patient trouvé.</p>
+          </div>
+        ) : null}
       </div>
 
       {/* Modal - Create Patient */}
@@ -230,7 +257,7 @@ export default function PatientsPage() {
                 value={newPatient.first_name}
                 onChange={(e) => setNewPatient({ ...newPatient, first_name: e.target.value })}
                 placeholder="Ex: Timo"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BAA8] focus:border-transparent"
               />
             </div>
 
@@ -241,7 +268,7 @@ export default function PatientsPage() {
                 value={newPatient.last_name}
                 onChange={(e) => setNewPatient({ ...newPatient, last_name: e.target.value })}
                 placeholder="Ex: Student"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BAA8] focus:border-transparent"
               />
             </div>
 
@@ -252,7 +279,7 @@ export default function PatientsPage() {
                 value={newPatient.email}
                 onChange={(e) => setNewPatient({ ...newPatient, email: e.target.value })}
                 placeholder="Ex: timo.test@example.com"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BAA8] focus:border-transparent"
               />
             </div>
 
@@ -263,7 +290,7 @@ export default function PatientsPage() {
                 value={newPatient.age || ''}
                 onChange={(e) => setNewPatient({ ...newPatient, age: e.target.value ? parseInt(e.target.value) : null })}
                 placeholder="Ex: 25"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BAA8] focus:border-transparent"
               />
             </div>
 
@@ -288,9 +315,9 @@ export default function PatientsPage() {
               </button>
               <button
                 onClick={handleCreatePatient}
-                className="flex-1 px-4 py-2 text-white bg-indigo-600 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                className="flex-1 px-4 py-2 text-white bg-[#00BAA8] rounded-lg font-medium hover:bg-[#008C7E] transition-colors"
               >
-                💾 Créer patient
+                Créer patient
               </button>
             </div>
           </div>

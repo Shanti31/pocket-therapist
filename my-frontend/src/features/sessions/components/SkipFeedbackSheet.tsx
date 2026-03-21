@@ -52,7 +52,7 @@ export default function SkipFeedbackSheet({
               onClick={() => setSelectedReason(reason)}
               className={`w-full text-left p-3 rounded-lg border transition-colors ${
                 selectedReason === reason
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  ? 'border-[#00BAA8] bg-[#f3f3f5] text-[#00BAA8]'
                   : 'border-gray-200 text-gray-700 hover:bg-gray-50'
               }`}
             >

@@ -38,7 +38,7 @@ export default function PendingSessions({ sessions, onStartSession }: PendingSes
             </div>
             <button
               onClick={() => onStartSession(session.id)}
-              className="w-full py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              className="w-full py-2.5 bg-[#00BAA8] text-white font-medium rounded-lg hover:bg-[#008C7E] transition-colors"
             >
               Démarrer
             </button>

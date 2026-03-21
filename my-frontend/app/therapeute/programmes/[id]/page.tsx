@@ -154,7 +154,7 @@ export default function ProgramDetailsPage({ params }: { params: Promise<{ id: s
       {program && !loadingProgram && (
         <>
           {/* Header avec titre et actions */}
-          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-indigo-600">
+          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-[#00BAA8]">
             <div className="flex items-start justify-between">
               <div>
                 <h1 className="text-4xl font-bold text-gray-900">{program.name}</h1>
@@ -169,7 +169,7 @@ export default function ProgramDetailsPage({ params }: { params: Promise<{ id: s
                 </Link>
                 <button
                   onClick={() => setIsEditing(!isEditing)}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                  className="px-4 py-2 bg-[#00BAA8] text-white rounded-lg font-medium hover:bg-[#008C7E] transition-colors"
                 >
                   {isEditing ? '✓ Terminer' : '✏️ Modifier'}
                 </button>
@@ -204,7 +204,7 @@ export default function ProgramDetailsPage({ params }: { params: Promise<{ id: s
           <h2 className="text-xl font-bold text-gray-900">🏋️ Exercices du Programme ({exercises.length})</h2>
           <button 
             onClick={() => setShowExerciseModal(true)}
-            className="px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
+            className="px-3 py-2 bg-[#00BAA8] text-white rounded-lg text-sm font-medium hover:bg-[#008C7E] transition-colors">
             + Ajouter exercice
           </button>
         </div>
@@ -232,7 +232,7 @@ export default function ProgramDetailsPage({ params }: { params: Promise<{ id: s
                   <td className="px-6 py-4 text-center">
                     <button 
                       onClick={() => setPlayingVideoUrl(exercise.videoUrl)}
-                      className="text-indigo-600 hover:text-indigo-800 font-medium mr-3">
+                      className="text-[#00BAA8] hover:text-[#008C7E] font-medium mr-3">
                       🎥 Voir
                     </button>
                     <button
@@ -275,7 +275,7 @@ export default function ProgramDetailsPage({ params }: { params: Promise<{ id: s
               saveExercisesToDatabase()
               setIsEditing(false)
             }}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+            className="px-6 py-3 bg-[#00BAA8] text-white rounded-lg font-medium hover:bg-[#008C7E] transition-colors">
             💾 Sauvegarder les modifications
           </button>
         </div>
@@ -315,7 +315,7 @@ export default function ProgramDetailsPage({ params }: { params: Promise<{ id: s
                       }
                       setShowExerciseModal(false)
                     }}
-                    className="w-full text-left p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-300 transition-colors cursor-pointer"
+                    className="w-full text-left p-4 border border-gray-200 rounded-lg hover:bg-[#e6faf8] hover:border-[#00BAA8] transition-colors cursor-pointer"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -336,7 +336,7 @@ export default function ProgramDetailsPage({ params }: { params: Promise<{ id: s
                               e.stopPropagation()
                               setPlayingVideoUrl(exercise.videoUrl)
                             }}
-                            className="text-indigo-600 hover:text-indigo-800 font-medium"
+                            className="text-[#00BAA8] hover:text-[#008C7E] font-medium"
                           >
                             🎥
                           </button>

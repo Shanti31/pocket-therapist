@@ -14,7 +14,7 @@ export default function TherapistList({ therapists }: TherapistListProps) {
             key={t.id}
             className="flex-shrink-0 flex flex-col items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200 min-w-[120px]"
           >
-            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-lg">
+            <div className="w-12 h-12 rounded-full bg-[#e9ebef] flex items-center justify-center text-[#00BAA8] font-bold text-lg">
               {t.firstName[0]}{t.lastName[0]}
             </div>
             <div className="text-center">

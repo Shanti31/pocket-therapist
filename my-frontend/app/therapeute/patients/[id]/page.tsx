@@ -85,8 +85,8 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
 
   if (loadingPatient) {
     return (
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-blue-800">Chargement du patient...</p>
+      <div className="bg-[#f3f3f5] border border-[#dfe1e6] rounded-lg p-4">
+        <p className="text-[#030213]">Chargement du patient...</p>
       </div>
     )
   }
@@ -95,7 +95,7 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
     return (
       <div className="space-y-6">
         <p className="text-gray-600">Patient non trouvé.</p>
-        <Link href="/therapeute/patients" className="text-indigo-600 hover:text-indigo-800">
+        <Link href="/therapeute/patients" className="text-[#00BAA8] hover:text-[#008C7E]">
           ← Retour aux patients
         </Link>
       </div>
@@ -224,7 +224,7 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-indigo-600">
+      <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-[#00BAA8]">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-4xl font-bold text-gray-900">
@@ -264,7 +264,7 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
           <h2 className="text-xl font-bold text-gray-900">📋 Programmes Assignés ({assignedPrograms.length})</h2>
           <button
             onClick={() => setShowAssignModal(true)}
-            className="px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
+            className="px-3 py-2 bg-[#00BAA8] text-white rounded-lg text-sm font-medium hover:bg-[#008C7E] transition-colors"
           >
             + Assigner programme
           </button>
@@ -283,12 +283,12 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
               </thead>
               <tbody>
                 {assignedPrograms.map((program, index) => (
-                  <tr key={program.id} className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}>
+                  <tr key={program.id} className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-[#f3f3f5] transition-colors`}>
                     <td className="px-6 py-4 font-medium text-gray-900">{program.title || program.name}</td>
                     <td className="px-6 py-4 text-gray-600 text-sm">{program.description}</td>
                     <td className="px-6 py-4 text-center">
                       <span className={`px-3 py-1 rounded-full font-medium text-sm ${
-                        program.is_personal ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                        program.is_personal ? 'bg-purple-100 text-purple-800' : 'bg-[#e9ebef] text-[#030213]'
                       }`}>
                         {program.is_personal ? '👤 Personnel' : '📋 Standard'}
                       </span>
@@ -297,7 +297,7 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
                       {!program.is_personal && (
                         <button
                           onClick={() => openAdaptModalFromTable(program)}
-                          className="px-3 py-1 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700 transition-colors"
+                          className="px-3 py-1 bg-[#00BAA8] text-white rounded text-sm font-medium hover:bg-[#008C7E] transition-colors"
                         >
                           ✏️ Adapter
                         </button>
@@ -351,7 +351,7 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
                       </div>
                       <button
                         onClick={() => handleAssignProgram(program.id)}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap ml-4"
+                        className="px-4 py-2 bg-[#00BAA8] text-white rounded-lg text-sm font-medium hover:bg-[#008C7E] transition-colors whitespace-nowrap ml-4"
                       >
                         ➕ Assigner
                       </button>
@@ -389,7 +389,7 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
                 value={adaptedData.name}
                 onChange={(e) => setAdaptedData({ ...adaptedData, name: e.target.value })}
                 placeholder="Ex: Réhabilitation Épaule - Timo"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#030213] focus:border-transparent"
               />
             </div>
 
@@ -401,7 +401,7 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
                 max="10"
                 value={adaptedData.difficulty}
                 onChange={(e) => setAdaptedData({ ...adaptedData, difficulty: parseInt(e.target.value) })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#030213] focus:border-transparent"
               />
             </div>
 
@@ -412,7 +412,7 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
                 value={adaptedData.duration}
                 onChange={(e) => setAdaptedData({ ...adaptedData, duration: e.target.value })}
                 placeholder="Ex: 4 semaines"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#030213] focus:border-transparent"
               />
             </div>
 
@@ -428,7 +428,7 @@ export default function PatientDetailsPage({ params }: { params: Promise<{ id: s
               </button>
               <button
                 onClick={handleAdaptProgram}
-                className="flex-1 px-4 py-2 text-white bg-indigo-600 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                className="flex-1 px-4 py-2 text-white bg-[#00BAA8] rounded-lg font-medium hover:bg-[#008C7E] transition-colors"
               >
                 Créer programme
               </button>
