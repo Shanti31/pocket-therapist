@@ -60,14 +60,14 @@ export default function BibliothequePage() {
 
   const categories = ['all', ...new Set(exercises.map((ex) => ex.category))]
 
-  const handleEdit = (exercise) => {
+  const handleEdit = (exercise: Exercise) => {
     setEditingId(exercise.id)
     setEditData({ ...exercise })
   }
 
-  const handleSave = (id) => {
+  const handleSave = (id: string) => {
     setExercises(
-      exercises.map((ex) => (ex.id === id ? { ...editData } : ex))
+      exercises.map((ex) => (ex.id === id ? { ...editData } as Exercise : ex))
     )
     setEditingId(null)
   }
